@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "393431327385",
+    "project_id": "anam-42579-2b855",
+    "storage_bucket": "anam-42579-2b855.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:393431327385:android:cda37b65bc95c4bbb94e08",
+        "android_client_info": {
+          "package_name": "com.ban3am"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "393431327385-ut76kknltactgppo8htp2vff1bu2ahk3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ban3am",
+            "certificate_hash": "7f75c11b8fa7ab2505000ba8ae60c5a70f8a242c"
+          }
+        },
+        {
+          "client_id": "393431327385-83tg2fappub34gtg7coj8gk8fku9ua0r.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDDWEGwET8QUYeAwhuEFda7AROgex_Dvt4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "393431327385-83tg2fappub34gtg7coj8gk8fku9ua0r.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

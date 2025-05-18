@@ -1,0 +1,42 @@
+class EndPoints {
+  static const siteUrl = 'https://ban3am.com/';
+  static const baseUrl = 'https://ban3am.com/api/v2';
+  static const imagesBaseUrl = 'https://ban3am.com/storage/';
+  static const products = '/products';
+  static const deleteProductImages = '/products/images';
+  static const wishList = '$users/wish-list';
+  static const changeWishProduct = '$users/wish-list$products';
+  static const changeProductStatus = '/products/toggle-status/';
+  static String postReviewProduct({required String id}) => '/reviews/$id/products';
+  static String reviewProduct({required String id}) => '/products/$id/reviews';
+  static String postReviewVendor({required String id}) => '/reviews/$id/vendors';
+  static String vendorReviews(int vendorId) => '/vendors/$vendorId/reviews';
+  static String userFollowing({required String id}) => '/users/$id/followings';
+  static String vendorFollowing({required String id}) => '/vendors/$id/followers';
+  static const following = '/following';
+  static const register = '/register';
+  static const login = '/login';
+  static const packages = '/packages';
+  static const getaccount = '/getaccount';
+  static const socialLogin = '/user/social-login';
+  static const subscribePackage = '/users/subscribe';
+  static const profile = '/profile';
+  static const vendorDetails = '/vendors';
+  static const password = '/password';
+  static const stores = '/stores';
+  static const users = '/users';
+  static const follow = '/follow';
+  static const unfollow = '/unfollow';
+  static const laborers = '/laborers';
+  static const services = '/services';
+  static const multiLang = '/multi-lang';
+  static const veterinarians = '/veterinarians';
+  static const categories = '/categories';
+  static const countries = '/countries';
+  static const cities = '/cities';
+  static const states = '/states';
+  static const notifications = '/notifications';
+  static const currency = '/currency/all';
+  static String exchangeRate({required String base, required String target}) =>
+      '/exchange-rate?base=$base&target=$target';
+}
