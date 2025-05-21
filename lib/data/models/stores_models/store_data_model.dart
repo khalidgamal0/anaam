@@ -6,7 +6,7 @@ import '../services/services_model.dart';
 import '../status_moddel.dart';
 import '../vendor_info_model.dart';
 
-class StoreDataModel extends Equatable {
+class StoreDataModel extends Equatable implements MapItem {
   final int? id;
   final String? name;
   final String? phone;
@@ -119,4 +119,14 @@ class TruckImageModel extends Equatable {
       updatedAt: json['updated_at'],
     );
   }
+}
+
+
+
+
+
+abstract class MapItem {
+  String? get coordinates;
+  String? get name;
+  int? get id;
 }

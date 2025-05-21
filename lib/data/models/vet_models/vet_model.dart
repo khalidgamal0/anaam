@@ -5,8 +5,9 @@ import '../city_model/city_model.dart';
 import '../country_model/country_model.dart';
 import '../services/services_model.dart';
 import '../../models/status_moddel.dart';
+import '../stores_models/store_data_model.dart';
 
-class VetModel extends Equatable {
+class VetModel extends Equatable implements MapItem {
   final int? id;
   final String? name;
   final String? address;

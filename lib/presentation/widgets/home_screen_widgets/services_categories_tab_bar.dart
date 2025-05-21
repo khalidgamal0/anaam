@@ -1,3 +1,4 @@
+import 'package:an3am/domain/controllers/map_cubit/service_map_cubit/service_map_cubit.dart';
 import 'package:an3am/presentation/widgets/home_screen_widgets/categories_and_subcategories_tab_bars_widgets/categories_tab_bar_item_widget.dart';
 import 'package:an3am/presentation/widgets/shared_widget/custom_sized_box.dart';
 import 'package:flutter/material.dart';
@@ -41,7 +42,10 @@ class _ServicesCategoriesTabBarWidgetState
           ),
           child: cubit.getAllServicesLoading
               ? const CategoriesShimmerEffectList()
-              : ListView.separated(
+              : BlocBuilder<ServiceMapCubit, ServiceMapState>(
+  builder: (context, state) {
+    var cubitServiceMapCubit=ServiceMapCubit.get(context);
+    return ListView.separated(
                   separatorBuilder: (_, index) => const CustomSizedBox(
                     width: 4,
                   ),
@@ -52,6 +56,21 @@ class _ServicesCategoriesTabBarWidgetState
                   itemBuilder: (BuildContext context, int index) {
                     return CategoriesTabBarItem(
                       onTap: () {
+                        cubitServiceMapCubit
+                          .updateLocalProducts(
+                            index == 0
+                                ? [
+                              ...cubit.laborersList,
+                              ...cubit.vetsList,
+                              ...cubit.storesList,
+                            ]
+                                : index == 1
+                                ? cubit.vetsList
+                                : index == 2
+                                ? cubit.storesList
+                                : cubit.laborersList,
+                          );
+
                         cubit.changeServicesCategoriesTabBarWidget(index);
                       },
                       isSelected: index == cubit.selectedServicesCategoryIndex,
@@ -59,7 +78,9 @@ class _ServicesCategoriesTabBarWidgetState
                       title: cubit.allServicesList[index].name!,
                     );
                   },
-                ),
+                );
+  },
+),
         );
       },
     );

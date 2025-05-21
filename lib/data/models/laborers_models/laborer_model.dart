@@ -2,9 +2,10 @@ import 'package:equatable/equatable.dart';
 
 import '../services/services_model.dart';
 import '../status_moddel.dart';
+import '../stores_models/store_data_model.dart';
 import '../vendor_info_model.dart';
 
-class LaborerModel extends Equatable {
+class LaborerModel extends Equatable implements MapItem {
   final int? id;
   final String? name;
   final String? nationality;

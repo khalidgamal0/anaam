@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 import 'dart:convert';
 
@@ -281,6 +282,11 @@ class ProductsCubit extends Cubit<ProductsState> {
     CacheHelper.removeData(key: mapProductsCacheKey);
     CacheHelper.removeData(key: mapProductsPaginationKey);
   }
+void clearList(){
+  productsList.clear();
+  log('kkkkkkkkkkkkkkkkkkkkkk');
+  emit(GetAllProductsSuccessState());
+}
 
   void getAllProducts({
     String? mapids,
