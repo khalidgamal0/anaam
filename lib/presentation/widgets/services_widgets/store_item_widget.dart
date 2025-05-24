@@ -1,3 +1,4 @@
+import 'package:an3am/presentation/widgets/services_widgets/vet_services_item_widget.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -187,6 +188,29 @@ class StoreServicesWidget extends StatelessWidget {
             ),
           ],
         ),
+
+        const CustomSizedBox(height: 12),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: Text(
+                storeDataModel.country?.name ?? "",
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.labelSmall!.copyWith(
+                  fontSize: 16.sp,
+                ),
+              ),
+            ),
+
+            if (buildFlag( storeDataModel.country?.id) != null) ...[
+              buildFlag( storeDataModel.country?.id)!,
+              SizedBox(width: 5.w),
+            ],
+          ],
+        ),
+        const CustomSizedBox(height: 4),
       ],
     );
   }

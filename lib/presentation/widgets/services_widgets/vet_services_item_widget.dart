@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:an3am/core/app_theme/app_colors.dart';
 import 'package:an3am/data/models/vet_models/vet_model.dart';
 import 'package:an3am/domain/controllers/profile_cubit/profile_cubit.dart';
@@ -9,6 +11,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../../core/app_router/screens_name.dart';
@@ -206,6 +209,30 @@ class VetServicesWidget extends StatelessWidget {
                 ),
               ],
             ),
+            const CustomSizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    vetModel.country?.name ?? "",
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.labelSmall!.copyWith(
+                      fontSize: 16.sp,
+                    ),
+                  ),
+                ),
+
+                if (buildFlag(vetModel.country?.id) != null) ...[
+                  buildFlag(vetModel.country?.id)!,
+                  SizedBox(width: 5.w),
+                ],
+              ],
+            ),
+            const CustomSizedBox(height: 4),
+
+
           ],
         );
       },
@@ -214,4 +241,25 @@ class VetServicesWidget extends StatelessWidget {
       },
     );
   }
+}
+
+
+
+Widget? buildFlag(final int? countryId) {
+  final cached = CacheHelper.getData(key: 'all_countries');
+  if (cached != null) {
+    final Map<String, dynamic> data = json.decode(cached);
+    if (data['result'] != null) {
+      List<dynamic> countries = data['result'];
+      final country = countries.firstWhere((e) => e['id'] ==countryId , orElse: () => null);
+      if (country != null && country['CodeName'] != null) {
+        return SvgPicture.network(
+          "https://ban3am.com/flags/${country['CodeName']}.svg",
+          width: 30.w,
+          height: 30.h,
+        );
+      }
+    }
+  }
+  return null;
 }

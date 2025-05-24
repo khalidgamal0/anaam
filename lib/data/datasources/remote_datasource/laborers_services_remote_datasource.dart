@@ -48,7 +48,8 @@ class LaborersRemoteDatasource extends ServicesBaseDatasource<
 
   @override
   Future<Either<ErrorException, GetAllLaborersModel>> getAll(
-      {required int pageNumber}) async {
+      {required int pageNumber}) async
+  {
     try {
       final response = await dioHelper.getData(
         url: "${EndPoints.laborers}?page=$pageNumber",
@@ -70,7 +71,8 @@ class LaborersRemoteDatasource extends ServicesBaseDatasource<
 
   @override
   Future<Either<ErrorException, GetAllLaborersModel>> getUserFollowing(
-      {required int pageNumber}) async {
+      {required int pageNumber})
+  async {
     try {
       final response = await dioHelper.getData(
         url: "${EndPoints.laborers}${EndPoints.following}?page=$pageNumber",
@@ -92,7 +94,8 @@ class LaborersRemoteDatasource extends ServicesBaseDatasource<
 
   @override
   Future<Either<ErrorException, LaborerModel>> showSingle(
-      {required int id,}) async {
+      {required int id,})
+  async {
     try {
       final response = await dioHelper.getData(
         url: "${EndPoints.laborers}/$id",

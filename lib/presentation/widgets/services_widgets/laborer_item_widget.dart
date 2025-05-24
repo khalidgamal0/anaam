@@ -1,5 +1,6 @@
 import 'package:an3am/data/models/laborers_models/laborer_model.dart';
 import 'package:an3am/presentation/screens/main_layout_screens/services_screens/add_laborer_screen.dart';
+import 'package:an3am/presentation/widgets/services_widgets/vet_services_item_widget.dart';
 import 'package:an3am/presentation/widgets/shared_widget/custom_elevated_button.dart';
 import 'package:an3am/presentation/widgets/shared_widget/custom_sized_box.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -120,14 +121,29 @@ class LaborerServicesWidget extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
-                  child: Text(
-                    laborerModel.name!,
-                    style: CustomThemes.greyColor34TextTheme(context).copyWith(
-                      fontSize: 14.sp,
-                      height: 1,
-                      fontWeight: FontWeight.w400,
-                    ),
-                    overflow: TextOverflow.ellipsis,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+
+                    children: [
+                      Text(
+                        laborerModel.name!,
+                        style: CustomThemes.greyColor34TextTheme(context).copyWith(
+                          fontSize: 14.sp,
+                          height: 1,
+                          fontWeight: FontWeight.w400,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const CustomSizedBox(height: 8),
+                      Text(
+                        laborerModel.nationality ?? "",
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.labelSmall!.copyWith(
+                          fontSize: 16.sp,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 Row(
@@ -196,6 +212,7 @@ class LaborerServicesWidget extends StatelessWidget {
                 ),
               ],
             ),
+
           ],
         );
       },

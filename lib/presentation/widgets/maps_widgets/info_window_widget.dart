@@ -187,3 +187,4 @@ class _InfoWindowWidgetState extends State<InfoWindowWidget> {
     );
   }
 }
+

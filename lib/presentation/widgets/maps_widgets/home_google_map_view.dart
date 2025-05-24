@@ -240,15 +240,9 @@ class _HomeGoogleMapsViewState extends State<HomeGoogleMapsView> {
     }
   }
 
-  Future<Uint8List> getBytesFromAsset(String path, int width) async {
-    ByteData data = await rootBundle.load(path);
-    ui.Codec codec = await ui.instantiateImageCodec(data.buffer.asUint8List(), targetWidth: width);
-    ui.FrameInfo fi = await codec.getNextFrame();
-    return (await fi.image.toByteData(format: ui.ImageByteFormat.png))!.buffer.asUint8List();
-  }
-
   Future<void> getCurrentMarker() async {
-    final Uint8List markerIcon = await getBytesFromAsset(ImagesPath.mapMarkerIcon, 100.w.toInt());
+    final Uint8List markerIcon =
+        await getBytesFromAsset(ImagesPath.mapMarkerIcon, 100.w.toInt());
     currentIcon = BitmapDescriptor.fromBytes(markerIcon);
   }
 
@@ -265,21 +259,27 @@ class _HomeGoogleMapsViewState extends State<HomeGoogleMapsView> {
         text: TextSpan(
             text: "$count",
             style: TextStyle(
-                fontSize: 35, color: Colors.white, fontWeight: FontWeight.bold)),
+                fontSize: 35,
+                color: Colors.white,
+                fontWeight: FontWeight.bold)),
         textDirection: TextDirection.ltr);
     textPainter.layout();
     textPainter.paint(
         canvas,
-        Offset((size - textPainter.width) / 2, (size - textPainter.height) / 2));
+        Offset(
+            (size - textPainter.width) / 2, (size - textPainter.height) / 2));
     final ui.Image img = await recorder.endRecording().toImage(size, size);
     final ByteData? data = await img.toByteData(format: ui.ImageByteFormat.png);
     return BitmapDescriptor.fromBytes(data!.buffer.asUint8List());
   }
 
   // New helper to collapse expanded cluster markers back into an aggregated marker
-  void collapseClusterMarkers(LatLng center, List<ProductDataModel> products) async {
+  void collapseClusterMarkers(
+      LatLng center, List<ProductDataModel> products) async
+  {
     // Remove all expanded markers for this cluster (filter by markerId suffix)
-    markers.removeWhere((marker) => marker.markerId.value.endsWith('_expanded'));
+    markers
+        .removeWhere((marker) => marker.markerId.value.endsWith('_expanded'));
     // Create the aggregated cluster marker again
     BitmapDescriptor clusterIcon = await getClusterBitmapDescriptor(products.length);
     markers.add(
@@ -297,19 +297,23 @@ class _HomeGoogleMapsViewState extends State<HomeGoogleMapsView> {
   }
 
   // Remove auto-collapse Future.delayed from expandClusterMarkers
-  void expandClusterMarkers(LatLng center, List<ProductDataModel> products) async {
+  void expandClusterMarkers(
+      LatLng center, List<ProductDataModel> products) async
+  {
     // Remove aggregated marker at the tapped point
     markers.removeWhere((marker) => marker.markerId.value == center.toString());
     // Clear any existing polylines for this cluster
-    _polylines.removeWhere((line) => line.polylineId.value.contains(center.toString()));
-    
+    _polylines.removeWhere(
+        (line) => line.polylineId.value.contains(center.toString()));
+
     // Create individual markers arranged in a circular layout:
     final double radius = 0.00015; // adjust spread distance as needed
     for (int i = 0; i < products.length; i++) {
       double angle = (2 * 3.14159265 * i) / products.length;
       double offsetLat = radius * cos(angle);
       double offsetLng = radius * sin(angle);
-      LatLng newPosition = LatLng(center.latitude + offsetLat, center.longitude + offsetLng);
+      LatLng newPosition =
+          LatLng(center.latitude + offsetLat, center.longitude + offsetLng);
       markers.add(
         Marker(
           markerId: MarkerId("${products[i].id}_expanded"),
@@ -334,7 +338,7 @@ class _HomeGoogleMapsViewState extends State<HomeGoogleMapsView> {
         ),
       );
     }
-    setState(() {}); 
+    setState(() {});
     if (_mapController != null) {
       _mapController!.animateCamera(CameraUpdate.newLatLngZoom(center, 18));
     }
@@ -356,7 +360,8 @@ class _HomeGoogleMapsViewState extends State<HomeGoogleMapsView> {
       grouped.forEach((key, products) {
         if (products.length > 1 && !_autoExpandedClusters.contains(key)) {
           List<String> parts = key.split(",");
-          LatLng center = LatLng(double.parse(parts.first.trim()), double.parse(parts.last.trim()));
+          LatLng center = LatLng(double.parse(parts.first.trim()),
+              double.parse(parts.last.trim()));
           expandClusterMarkers(center, products);
           _autoExpandedClusters.add(key);
         }
@@ -528,139 +533,157 @@ class _HomeGoogleMapsViewState extends State<HomeGoogleMapsView> {
           listener: (context, state) {
             if (state is FilterProductsByCategory) {
               setState(() {
-                localProductsList = context.read<MapCubit>().filteredMapProducts;
+                localProductsList =
+                    context.read<MapCubit>().filteredMapProducts;
                 setMarkers();
               });
             }
           },
-          child:
-            isLoading
-                ? const Center(child: CircularProgressIndicator.adaptive())
-                : Stack(
-                children: [
-                  GoogleMap(
-                    initialCameraPosition:
-                        CameraPosition(target: calculateCenter(), zoom: 5.0),
-                    onMapCreated: (controller) async {
-                      if (!HomeGoogleMapsView.googleMapController.isCompleted) {
-                        HomeGoogleMapsView.googleMapController
-                            .complete(controller);
-                      }
-                      _mapController = controller;
-                      customInfoWindowController.googleMapController =
-                          controller;
+          child: isLoading
+              ? const Center(child: CircularProgressIndicator.adaptive())
+              : Stack(
+                  children: [
+                    GoogleMap(
+                      initialCameraPosition:
+                          CameraPosition(target: calculateCenter(), zoom: 5.0),
+                      onMapCreated: (controller) async {
+                        if (!HomeGoogleMapsView
+                            .googleMapController.isCompleted) {
+                          HomeGoogleMapsView.googleMapController
+                              .complete(controller);
+                        }
+                        _mapController = controller;
+                        customInfoWindowController.googleMapController =
+                            controller;
 
-                      _lastKnownBounds =
-                          await _mapController!.getVisibleRegion();
-                      setState(() => isMapReady = true);
-                      Future.delayed(const Duration(milliseconds: 500),
-                          () => getVisibleMarkers());
-                    },
-                    onTap: (latLng) {
-                      customInfoWindowController.hideInfoWindow?.call();
-                      collapseAllClusters();
-                    },
-                    onCameraMove: (CameraPosition position) =>
-                        _debouncedGetVisibleMarkers(),
-                    onCameraIdle: () {
-                      getVisibleMarkers();
-                      autoExpandClusters();
-                    },
-                    compassEnabled: true,
-                    mapToolbarEnabled: true,
-                    gestureRecognizers: {
-                      Factory<OneSequenceGestureRecognizer>(
-                          () => EagerGestureRecognizer())
-                    },
-                    markers: markers,
-                    polylines: _polylines,
-                  ),
-                  CustomInfoWindow(
-                    controller: customInfoWindowController,
-                    width: 255.w,
-                    height: 230.h,
-                    offset: 30.h,
-                  ),
-                  if (isLoadingMore)
+                        _lastKnownBounds =
+                            await _mapController!.getVisibleRegion();
+                        setState(() => isMapReady = true);
+                        Future.delayed(const Duration(milliseconds: 500),
+                            () => getVisibleMarkers());
+                      },
+                      onTap: (latLng) {
+                        customInfoWindowController.hideInfoWindow?.call();
+                        collapseAllClusters();
+                      },
+                      onCameraMove: (CameraPosition position) =>
+                          _debouncedGetVisibleMarkers(),
+                      onCameraIdle: () {
+                        getVisibleMarkers();
+                        autoExpandClusters();
+                      },
+                      compassEnabled: true,
+                      mapToolbarEnabled: true,
+                      gestureRecognizers: {
+                        Factory<OneSequenceGestureRecognizer>(
+                            () => EagerGestureRecognizer())
+                      },
+                      markers: markers,
+                      polylines: _polylines,
+                    ),
+
+                    CustomInfoWindow(
+                      controller: customInfoWindowController,
+                      width: 255.w,
+                      height: 230.h,
+                      offset: 30.h,
+                    ),
+                    if (isLoadingMore)
+                      Positioned(
+                        bottom: 20,
+                        left: 20,
+                        child: Container(
+                          padding: EdgeInsets.all(8.r),
+                          decoration: BoxDecoration(
+                            color: Colors.black54,
+                            borderRadius: BorderRadius.circular(30.r),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              SizedBox(
+                                width: 20.w,
+                                height: 20.h,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2.w,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white),
+                                ),
+                              ),
+                              SizedBox(width: 8.w),
+                              Text(
+                                'جاري تحميل المنتجات...',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12.sp,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                     Positioned(
-                      bottom: 20,
-                      left: 20,
+                      top: 20,
+                      right: 20,
                       child: Container(
                         padding: EdgeInsets.all(8.r),
                         decoration: BoxDecoration(
-                          color: Colors.black54,
-                          borderRadius: BorderRadius.circular(30.r),
+                          color: Colors.black.withOpacity(0.5),
+                          borderRadius: BorderRadius.circular(8.r),
                         ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            SizedBox(
-                              width: 20.w,
-                              height: 20.h,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2.w,
-                                valueColor:
-                                    AlwaysStoppedAnimation<Color>(Colors.white),
-                              ),
-                            ),
-                            SizedBox(width: 8.w),
-                            Text(
-                              'جاري تحميل المنتجات...',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 12.sp,
-                              ),
-                            ),
-                          ],
+                        child: Text(
+                          'تم تحميل ${localProductsList.length} منتج',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
-                  Positioned(
-                    top: 20,
-                    right: 20,
-                    child: Container(
-                      padding: EdgeInsets.all(8.r),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.5),
-                        borderRadius: BorderRadius.circular(8.r),
-                      ),
-                      child: Text(
-                        'تم تحميل ${localProductsList.length} منتج',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 12.sp,
-                          fontWeight: FontWeight.bold,
+                    // Developer button to clear cache and reload
+                    if (kDebugMode)
+                      Positioned(
+                        top: 20.h,
+                        left: 20.w,
+                        child: FloatingActionButton(
+                          heroTag: 'clearCacheMap',
+                          // Added unique heroTag
+                          mini: true,
+                          backgroundColor: Colors.orange,
+                          // Dev button color
+                          onPressed: () async {
+                            await ProductsCubit.get(context)
+                                .clearMapCacheAndReset();
+                            // Call loadFreshProducts to re-fetch from server
+                            loadFreshProducts();
+                            if (mounted) {
+                              // Check if widget is still in tree
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                    content: Text(
+                                        'Map cache cleared. Reloading products...')),
+                              );
+                            }
+                          },
+                          child: Icon(Icons.delete_sweep, color: Colors.white),
+                          tooltip: 'Clear Map Cache & Reload',
                         ),
                       ),
-                    ),
-                  ),
-                  // Developer button to clear cache and reload
-                  if (kDebugMode)
-                    Positioned(
-                      top: 20.h, 
-                      left: 20.w,
-                      child: FloatingActionButton(
-                        heroTag: 'clearCacheMap', // Added unique heroTag
-                        mini: true,
-                        backgroundColor: Colors.orange, // Dev button color
-                        onPressed: () async {
-                          await ProductsCubit.get(context).clearMapCacheAndReset();
-                          // Call loadFreshProducts to re-fetch from server
-                          loadFreshProducts(); 
-                          if (mounted) { // Check if widget is still in tree
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Map cache cleared. Reloading products...')),
-                            );
-                          }
-                        },
-                        child: Icon(Icons.delete_sweep, color: Colors.white),
-                        tooltip: 'Clear Map Cache & Reload',
-                      ),
-                    ),
-                ],
-              ),
+                  ],
+                ),
         );
       },
     );
   }
+}
+
+Future<Uint8List> getBytesFromAsset(String path, int width) async {
+  ByteData data = await rootBundle.load(path);
+  ui.Codec codec = await ui.instantiateImageCodec(data.buffer.asUint8List(),
+      targetWidth: width);
+  ui.FrameInfo fi = await codec.getNextFrame();
+  return (await fi.image.toByteData(format: ui.ImageByteFormat.png))!
+      .buffer
+      .asUint8List();
 }

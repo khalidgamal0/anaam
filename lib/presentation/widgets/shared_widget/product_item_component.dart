@@ -196,15 +196,6 @@ class _ProductItemComponentState extends State<ProductItemComponent> {
             ),
           ),
           const CustomSizedBox(height: 4),
-          // # Original price display commented out:
-          // Text(
-          //   "$productPrice $productCurrencyName",
-          //   style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-          //     fontSize: 16.sp,
-          //   ),
-          // ),
-          // New: Always show the client's selected currency price
-          // Update price text to include price type in parentheses
           Text(
             "$convertedPrice $clientCurrencyName$priceTypeDisplay",
             style: Theme.of(context).textTheme.headlineSmall!.copyWith(

@@ -5,3 +5,4 @@ sealed class ServiceMapState {}
 final class ServiceMapInitial extends ServiceMapState {}
 final class ServiceMapMarkersUpdated extends ServiceMapState {}
 final class UpdateStateMarker extends ServiceMapState {}
+final class newState extends ServiceMapState {}

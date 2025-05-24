@@ -36,6 +36,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late TabController _followersServicesTabController;
   late AnimationController expandController;
   late Animation<double> animation;
+  int servicseSelectedIndex=0;
   ProductsCubit? cubit;
 
   @override
@@ -236,7 +237,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     ),
                     Column(
                       children: [
-                        const ServicesCategoriesTabBarWidget(),
+                        if(!isServicesFollowingTap)
+                         ServicesCategoriesTabBarWidget(isServicesFollowingTap:isServicesFollowingTap),
                         BlocBuilder<ServiceMapCubit, ServiceMapState>(
                           builder: (context, state) {
                             return FollowingAndFollowersTabBar(
@@ -244,11 +246,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                               onTap: (index) {
                                 if (index == 0) {
                                   isServicesFollowingTap = false;
-
                                 } else {
                                   isServicesFollowingTap = true;
                                 }
                                 setState(() {});
+                                context.read<ServiceMapCubit>().setStat();
                               },
                             );
                           },
@@ -268,6 +270,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                             null
                                         ? const AlwaysScrollableScrollPhysics()
                                         : const NeverScrollableScrollPhysics(),
+
                                 children: [
                                   // First tab content
                                   isMap
@@ -283,7 +286,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                           key: CacheKeys.token) !=
                                       null)
                                     isMap
-                                        ? Container() // or a placeholder widget like SizedBox.shrink()
+                                        ? ServiceMapWidget()
                                         : ServicesFollowingList(),
                                   if (CacheHelper.getData(
                                           key: CacheKeys.token) ==

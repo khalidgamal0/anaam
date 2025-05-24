@@ -128,5 +128,10 @@ class TruckImageModel extends Equatable {
 abstract class MapItem {
   String? get coordinates;
   String? get name;
+  String? get image;
+  String? get mapLocation;
+
+
   int? get id;
+
 }

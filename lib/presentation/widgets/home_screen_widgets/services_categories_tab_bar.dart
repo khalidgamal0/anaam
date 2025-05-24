@@ -10,7 +10,11 @@ import '../../../domain/controllers/services_cubit/services_state.dart';
 import 'categories_shimmer_effect.dart';
 
 class ServicesCategoriesTabBarWidget extends StatefulWidget {
-  const ServicesCategoriesTabBarWidget({super.key});
+  const ServicesCategoriesTabBarWidget(
+      {super.key, required this.isServicesFollowingTap, this.onCategorySelected});
+
+  final bool isServicesFollowingTap;
+  final Function(int)? onCategorySelected;
 
   @override
   State<ServicesCategoriesTabBarWidget> createState() =>
@@ -43,44 +47,53 @@ class _ServicesCategoriesTabBarWidgetState
           child: cubit.getAllServicesLoading
               ? const CategoriesShimmerEffectList()
               : BlocBuilder<ServiceMapCubit, ServiceMapState>(
-  builder: (context, state) {
-    var cubitServiceMapCubit=ServiceMapCubit.get(context);
-    return ListView.separated(
-                  separatorBuilder: (_, index) => const CustomSizedBox(
-                    width: 4,
-                  ),
-                  itemCount: cubit.allServicesList.length,
-                  scrollDirection: Axis.horizontal,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                  itemBuilder: (BuildContext context, int index) {
-                    return CategoriesTabBarItem(
-                      onTap: () {
-                        cubitServiceMapCubit
-                          .updateLocalProducts(
-                            index == 0
-                                ? [
-                              ...cubit.laborersList,
-                              ...cubit.vetsList,
-                              ...cubit.storesList,
-                            ]
-                                : index == 1
-                                ? cubit.vetsList
-                                : index == 2
-                                ? cubit.storesList
-                                : cubit.laborersList,
-                          );
+                  builder: (context, state) {
+                    var cubitServiceMapCubit = ServiceMapCubit.get(context);
+                    return ListView.separated(
+                      separatorBuilder: (_, index) => const CustomSizedBox(
+                        width: 4,
+                      ),
+                      itemCount: cubit.allServicesList.length,
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 4),
+                      itemBuilder: (BuildContext context, int index) {
+                        return CategoriesTabBarItem(
+                          onTap: () {
+                            cubitServiceMapCubit.updateLocalProducts(
+                              index == 0
+                                  ? (widget.isServicesFollowingTap
+                                      ? [
+                                          ...cubit.userFollowingLaborersList,
+                                          ...cubit.userFollowingVetList,
+                                          ...cubit.userFollowingStoreList,
+                                        ]
+                                      : [
+                                          ...cubit.laborersList,
+                                          ...cubit.vetsList,
+                                          ...cubit.storesList,
+                                        ])
+                                  : index == 1
+                                      ? (widget.isServicesFollowingTap?cubit.userFollowingVetList:cubit.vetsList)
+                                      : index == 2
+                                          ? (widget.isServicesFollowingTap?cubit.userFollowingStoreList:cubit.storesList)
+                                          : (widget.isServicesFollowingTap?cubit.userFollowingLaborersList:cubit.laborersList)
 
-                        cubit.changeServicesCategoriesTabBarWidget(index);
+                            );
+
+                            cubit.changeServicesCategoriesTabBarWidget(index);
+                            widget.onCategorySelected?.call(index);
+
+                          },
+                          isSelected:
+                              index == cubit.selectedServicesCategoryIndex,
+                          imagePath: cubit.allServicesList[index].image!,
+                          title: cubit.allServicesList[index].name!,
+                        );
                       },
-                      isSelected: index == cubit.selectedServicesCategoryIndex,
-                      imagePath: cubit.allServicesList[index].image!,
-                      title: cubit.allServicesList[index].name!,
                     );
                   },
-                );
-  },
-),
+                ),
         );
       },
     );
