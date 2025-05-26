@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:an3am/core/constants/extensions.dart';
 import 'package:an3am/domain/controllers/products_cubit/products_cubit.dart';
 import 'package:an3am/presentation/widgets/home_screen_widgets/search_bar_and_services_buttons_widget.dart';
@@ -36,7 +38,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late TabController _followersServicesTabController;
   late AnimationController expandController;
   late Animation<double> animation;
-  int servicseSelectedIndex=0;
+  int servicseSelectedIndex = 0;
   ProductsCubit? cubit;
 
   @override
@@ -128,211 +130,234 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     }
   }
 
+  // String? mapServiceIds;
+
+  void updateVisibleService() {
+
+    ServicesCubit.get(context).allLaborerPageNumber = 1;
+    ServicesCubit.get(context).allStorePageNumber = 1;
+    ServicesCubit.get(context).allVetPageNumber = 1;
+    ServicesCubit.get(context).laborersList.clear();
+    ServicesCubit.get(context).storesList.clear();
+    ServicesCubit.get(context).vetsList.clear();
+    setState(() {});
+
+    ServicesCubit.get(context).getAllLaborer();
+    ServicesCubit.get(context).getAllStore();
+    ServicesCubit.get(context).getAllVet();
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     var cubit_ProfileCubit = ProfileCubit.get(context);
     final token = CacheHelper.getData(key: CacheKeys.token);
-    var cubitServicesCubit=context.read<ServicesCubit>();
+    var cubitServicesCubit = context.read<ServicesCubit>();
 
-    return Scaffold(
-      body: BlocProvider(
-        create: (context) => ServiceMapCubit()..updateLocalProducts([
+    return BlocProvider(
+      create: (context) => ServiceMapCubit()
+        ..updateLocalProducts([
           ...cubitServicesCubit.laborersList,
           ...cubitServicesCubit.vetsList,
           ...cubitServicesCubit.storesList,
         ]),
-        child: SafeArea(
-          child: NestedScrollView(
-            headerSliverBuilder: (_, isScrolled) => [
-              SliverToBoxAdapter(
-                child: HomeTabBarWidget(
-                  tabController: _itemsTypeTabController,
-                  onTap: (index) {
-                    setState(() {
-                      isMap = false;
-                    });
-                    // if (index == 0) {
-                    //   // Show map button when on the first tab  (products)
-                    //   setState(() {
-                    //     appearMapButton = true;
-                    //   });
-                    // } else {
-                    //   // Show map button when on the second tab (services)
-                    //   // setState(() {
-                    //   //   appearMapButton = true;
-                    //   // });
-                    //   // Hide map button when on the second tab (services)
-                    //   setState(() {
-                    //     appearMapButton = false;
-                    //   });
-                    // }
-                  },
-                ).onlyDirectionalPadding(
-                  start: 16,
-                  end: 16,
-                  top: 16,
-                ),
+  child: Scaffold(
+      body: SafeArea(
+        child: NestedScrollView(
+          headerSliverBuilder: (_, isScrolled) => [
+            SliverToBoxAdapter(
+              child: HomeTabBarWidget(
+                tabController: _itemsTypeTabController,
+                onTap: (index) {
+                  setState(() {
+                    isMap = false;
+                  });
+                  // if (index == 0) {
+                  //   // Show map button when on the first tab  (products)
+                  //   setState(() {
+                  //     appearMapButton = true;
+                  //   });
+                  // } else {
+                  //   // Show map button when on the second tab (services)
+                  //   // setState(() {
+                  //   //   appearMapButton = true;
+                  //   // });
+                  //   // Hide map button when on the second tab (services)
+                  //   setState(() {
+                  //     appearMapButton = false;
+                  //   });
+                  // }
+                },
+              ).onlyDirectionalPadding(
+                start: 16,
+                end: 16,
+                top: 16,
               ),
-              SliverToBoxAdapter(
-                child: SearchBarAndServicesButtonsWidget(
-                    mapButton: appearMapButton),
-              )
-            ],
-            body: Stack(
-              alignment: Alignment.bottomCenter,
-              children: [
-                TabBarView(
-                  physics: const NeverScrollableScrollPhysics(),
-                  controller: _itemsTypeTabController,
-                  children: [
-                    Column(
-                      children: [
-                        SizeTransition(
-                          axisAlignment: 1.0,
-                          sizeFactor: animation,
-                          child: const Column(
-                            children: [
-                              ProductCategoriesTabBarWidget(),
-                            ],
-                          ),
+            ),
+            SliverToBoxAdapter(
+              child: SearchBarAndServicesButtonsWidget(
+                  mapButton: appearMapButton),
+            )
+          ],
+          body: Stack(
+            alignment: Alignment.bottomCenter,
+            children: [
+              TabBarView(
+                physics: const NeverScrollableScrollPhysics(),
+                controller: _itemsTypeTabController,
+                children: [
+                  Column(
+                    children: [
+                      SizeTransition(
+                        axisAlignment: 1.0,
+                        sizeFactor: animation,
+                        child: const Column(
+                          children: [
+                            ProductCategoriesTabBarWidget(),
+                          ],
                         ),
-                        FollowingAndFollowersTabBar(
-                          tabController: _followersTabController,
-                          onTap: (index) {
-                            if (token != null) {
-                              if (index == 0) {
-                                isFollowingTap = false;
-                                expandController.forward();
-                              } else {
-                                isFollowingTap = true;
-                                expandController.reverse();
-                              }
-                              setState(() {});
+                      ),
+                      FollowingAndFollowersTabBar(
+                        tabController: _followersTabController,
+                        onTap: (index) {
+                          if (token != null) {
+                            if (index == 0) {
+                              isFollowingTap = false;
+                              expandController.forward();
+                            } else {
+                              isFollowingTap = true;
+                              expandController.reverse();
                             }
-                          },
-                        ),
-                        const CustomSizedBox(
-                          height: 8,
-                        ),
-                        Expanded(
-                          child: isMap
-                              ? HomeGoogleMapsView(
-                                  productsList: ProductsCubit.get(context)
-                                      .getFilteredProducts(),
-                                  onVisibleIdsChanged:
-                                      updateVisibleProductIds, // Pass callback
-                                )
-                              : isFollowingTap &&
-                                      CacheHelper.getData(
-                                              key: CacheKeys.userType) !=
-                                          null
-                                  ? ProductsFollowingListViewWidget(
-                                      isGetAll: isFollowingTap,
-                                    )
-                                  : AllProductsListViewWidget(
-                                      isGetAll: !isFollowingTap,
-                                    ),
-                        )
-                      ],
-                    ),
-                    Column(
-                      children: [
-                        if(!isServicesFollowingTap)
-                         ServicesCategoriesTabBarWidget(isServicesFollowingTap:isServicesFollowingTap),
-                        BlocBuilder<ServiceMapCubit, ServiceMapState>(
+                            setState(() {});
+                          }
+                        },
+                      ),
+                      const CustomSizedBox(
+                        height: 8,
+                      ),
+                      Expanded(
+                        child: isMap
+                            ? HomeGoogleMapsView(
+                                productsList: ProductsCubit.get(context)
+                                    .getFilteredProducts(),
+                                onVisibleIdsChanged:
+                                    updateVisibleProductIds, // Pass callback
+                              )
+                            : isFollowingTap &&
+                                    CacheHelper.getData(
+                                            key: CacheKeys.userType) !=
+                                        null
+                                ? ProductsFollowingListViewWidget(
+                                    isGetAll: isFollowingTap,
+                                  )
+                                : AllProductsListViewWidget(
+                                    isGetAll: !isFollowingTap,
+                                  ),
+                      )
+                    ],
+                  ),
+                  Column(
+                    children: [
+                      if (!isServicesFollowingTap)
+                        ServicesCategoriesTabBarWidget(
+                            isServicesFollowingTap: isServicesFollowingTap),
+                      FollowingAndFollowersTabBar(
+                        tabController: _followersServicesTabController,
+                        onTap: (index) {
+                          if (index == 0) {
+                            isServicesFollowingTap = false;
+                          } else {
+                            isServicesFollowingTap = true;
+                          }
+                          setState(() {});
+                        },
+                      ),
+                      const CustomSizedBox(
+                        height: 8,
+                      ),
+                      Expanded(
+                        child: BlocConsumer<ServicesCubit, ServicesState>(
+                          listener: (context, state) {},
                           builder: (context, state) {
-                            return FollowingAndFollowersTabBar(
-                              tabController: _followersServicesTabController,
-                              onTap: (index) {
-                                if (index == 0) {
-                                  isServicesFollowingTap = false;
-                                } else {
-                                  isServicesFollowingTap = true;
-                                }
-                                setState(() {});
-                                context.read<ServiceMapCubit>().setStat();
-                              },
+                            var cubit = ServicesCubit.get(context);
+                            return TabBarView(
+                              controller: _followersServicesTabController,
+                              physics:
+                                  CacheHelper.getData(key: CacheKeys.token) !=
+                                          null
+                                      ? const AlwaysScrollableScrollPhysics()
+                                      : const NeverScrollableScrollPhysics(),
+                              children: [
+                                // First tab content
+                                isMap
+                                    ? ServiceMapWidget(
+                                       )
+                                    : (cubit.selectedServicesValue != null
+                                        ? ServicesAllProductsList()
+                                        : const Center(
+                                            child: CircularProgressIndicator
+                                                .adaptive())),
+
+                                // Second tab content (Following tab)
+                                if (CacheHelper.getData(
+                                        key: CacheKeys.token) !=
+                                    null)
+                                  isMap
+                                      ? ServiceMapWidget()
+                                      : ServicesFollowingList(),
+                                if (CacheHelper.getData(
+                                        key: CacheKeys.token) ==
+                                    null)
+                                  Container(),
+
+                              ],
                             );
                           },
                         ),
-                        const CustomSizedBox(
-                          height: 8,
-                        ),
-                        Expanded(
-                          child: BlocConsumer<ServicesCubit, ServicesState>(
-                            listener: (context, state) {},
-                            builder: (context, state) {
-                              var cubit = ServicesCubit.get(context);
-                              return TabBarView(
-                                controller: _followersServicesTabController,
-                                physics:
-                                    CacheHelper.getData(key: CacheKeys.token) !=
-                                            null
-                                        ? const AlwaysScrollableScrollPhysics()
-                                        : const NeverScrollableScrollPhysics(),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              Visibility(
+                child: ShowMapButton(
+                  isMap: isMap,
+                  onPressed: () async {
+                    setState(() {
+                      isMap = !isMap;
+                    });
+                    // Initial fetch when switching to map view
 
-                                children: [
-                                  // First tab content
-                                  isMap
-                                      ? ServiceMapWidget()
-                                      : (cubit.selectedServicesValue != null
-                                          ? ServicesAllProductsList()
-                                          : const Center(
-                                              child: CircularProgressIndicator
-                                                  .adaptive())),
-
-                                  // Second tab content (Following tab)
-                                  if (CacheHelper.getData(
-                                          key: CacheKeys.token) !=
-                                      null)
-                                    isMap
-                                        ? ServiceMapWidget()
-                                        : ServicesFollowingList(),
-                                  if (CacheHelper.getData(
-                                          key: CacheKeys.token) ==
-                                      null)
-                                    Container(),
-                                  // to fill the second tab when not logged in (so length matches)
-                                ],
-                              );
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                Visibility(
-                  child: ShowMapButton(
-                    isMap: isMap,
-                    onPressed: () async {
-                      setState(() {
-                        isMap = !isMap;
-                      });
-                      // Initial fetch when switching to map view
-
-                      if (!isMap) {
-                        ProductsCubit.get(context).allProductsPageNumber = 1;
+                    if (!isMap) {
+                      ProductsCubit.get(context).allProductsPageNumber = 1;
+                      ProductsCubit.get(context).productsList.clear();
+                      ProductsCubit.get(context).getAllProducts(
+                          mapids: visibleProductIds.isEmpty
+                              ? null
+                              : visibleProductIds);
+                      // updateVisibleService(mapServiceIds);
+                    } else {
+                      {
+                        ProductsCubit.get(context).allProductsPageNumber =
+                            1;
                         ProductsCubit.get(context).productsList.clear();
-                        ProductsCubit.get(context).getAllProducts(
-                            mapids: visibleProductIds.isEmpty
-                                ? null
-                                : visibleProductIds);
-                      } else {
-                        {
-                          ProductsCubit.get(context).allProductsPageNumber = 1;
-                          ProductsCubit.get(context).productsList.clear();
-                          ProductsCubit.get(context).getAllProducts();
-                        }
+                        ProductsCubit.get(context).getAllProducts();
                       }
+                      updateVisibleService();
+                      ServiceMapCubit()
+                        .updateLocalProducts([
+                          ...cubitServicesCubit.laborersList,
+                          ...cubitServicesCubit.vetsList,
+                          ...cubitServicesCubit.storesList,
+                        ]);
+                    }
 
-                      setState(() {});
-                    },
-                  ).onlyDirectionalPadding(bottom: 22),
-                  visible: appearMapButton,
-                )
-              ],
-            ),
+                    setState(() {});
+                  },
+                ).onlyDirectionalPadding(bottom: 22),
+                visible: appearMapButton,
+              )
+            ],
           ),
         ),
       ),
@@ -382,6 +407,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
-    );
+    ),
+);
   }
 }

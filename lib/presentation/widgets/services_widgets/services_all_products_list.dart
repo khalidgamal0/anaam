@@ -50,11 +50,11 @@ class _ServicesAllProductsListState extends State<ServicesAllProductsList> {
           ServicesCubit cubit = ServicesCubit.get(context);
           return cubit.selectedServicesValue!.type == ServicesTypeEnum.veterinary.name
               ? VetServicesList(
-                  vetsList: cubit.vetsList, isFollowing: false,
+                  vetsList:isFirstFetch?cubit.vetsList:cubit.vetsListFilterdMap, isFollowing: false,
                 )
               : cubit.selectedServicesValue!.type == ServicesTypeEnum.laborers.name
                   ? LaborersServicesList(
-                      laborersList: cubit.laborersList, isFollowing: false,
+                      laborersList:isFirstFetch?cubit.laborersList:cubit.laborersListFilterdMap, isFollowing: false,
                     )
                   : cubit.selectedServicesValue!.type == "all" // All category condition
                       ? ListView.separated(
@@ -71,7 +71,17 @@ class _ServicesAllProductsListState extends State<ServicesAllProductsList> {
                               cubit.laborersList.length +
                               cubit.storesList.length,
                           itemBuilder: (context, index) {
-                            final allServices = [
+                            final allServices =
+                             // (cubit.vetsListFilterdMap.isNotEmpty ||
+                             //    cubit.laborersListFilterdMap.isNotEmpty ||
+                             //    cubit.storesListFilterdMap.isNotEmpty) ?
+                             //
+                             // [
+                             //   ...cubit.vetsListFilterdMap,
+                             //   ...cubit.laborersListFilterdMap,
+                             //   ...cubit.storesListFilterdMap,
+                             // ]:
+                             [
                               ...cubit.vetsList,
                               ...cubit.laborersList,
                               ...cubit.storesList,
@@ -107,7 +117,7 @@ class _ServicesAllProductsListState extends State<ServicesAllProductsList> {
                           },
                         )
                       : StoreServicesList(
-                          storeList: cubit.storesList, isFollowing: false,
+                          storeList:isFirstFetch?cubit.storesList:cubit.storesListFilterdMap, isFollowing: false,
                         );
         },
       ),

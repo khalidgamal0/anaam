@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:an3am/core/network/dio_helper.dart';
 import 'package:an3am/core/parameters/store_parameters.dart';
 import 'package:an3am/data/models/stores_models/get_all_store_model.dart';
@@ -20,10 +22,17 @@ class StoresServicesRemoteDatasource extends ServicesBaseDatasource<GetAllStoreM
 
   @override
   Future<Either<ErrorException, GetAllStoreModel>> getAll(
-      {required int pageNumber,}) async {
+      {required int pageNumber,String? mapIds,}) async {
     try {
+
+      String url = "${EndPoints.stores}?page=$pageNumber";
+      if (mapIds != null) {
+        url += "&mapids=$mapIds";
+      }
+      log("urlurlurlurlurlurlurlurlurlurlurlurl ${url}");
+
       final response = await dioHelper.getData(
-        url: "${EndPoints.stores}?page=$pageNumber",
+        url: url,
         token: token,
       );
       return Right(GetAllStoreModel.fromJson(response.data));

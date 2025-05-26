@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:an3am/core/error/error_exception.dart';
 import 'package:an3am/core/parameters/vet_parameters.dart';
 import 'package:an3am/data/datasources/remote_datasource/services_base_remote_data_source.dart';
@@ -44,10 +46,16 @@ class VetServicesRemoteDatasource
 
   @override
   Future<Either<ErrorException, GetAllVetModel>> getAll(
-      {required int pageNumber}) async {
+      {required int pageNumber,String?mapIds}) async {
     try {
+      String url = "${EndPoints.veterinarians}?page=$pageNumber";
+      if (mapIds != null) {
+        url += "&mapids=$mapIds";
+      }
+      log("urlurlurlurlurlurlurlurlurlurlurlurl ${url}");
+
       final response = await dioHelper.getData(
-        url: "${EndPoints.veterinarians}?page=$pageNumber",
+        url: url,
         token: token,
       );
       return Right(GetAllVetModel.fromJson(response.data));

@@ -568,6 +568,7 @@ class _HomeGoogleMapsViewState extends State<HomeGoogleMapsView> {
                       },
                       onCameraMove: (CameraPosition position) =>
                           _debouncedGetVisibleMarkers(),
+
                       onCameraIdle: () {
                         getVisibleMarkers();
                         autoExpandClusters();

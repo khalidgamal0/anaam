@@ -30,6 +30,7 @@ import '../../../data/models/vet_models/vet_model.dart';
 import 'services_state.dart';
 import 'package:an3am/data/models/country_model/country_model.dart';
 
+bool isFirstFetch=true;
 class ServicesCubit extends Cubit<ServicesState> {
   ServicesCubit() : super(ServicesInitial());
 
@@ -37,7 +38,8 @@ class ServicesCubit extends Cubit<ServicesState> {
 
   final LaborersRemoteDatasource _laborerRemoteDatasource = sl();
   final MultiLangRemoteDataSource _multiLangRemoteDataSource = sl();
-  final CitiesAndCountriesRemoteDatasource _citiesAndCountriesRemoteDatasource = sl();
+  final CitiesAndCountriesRemoteDatasource _citiesAndCountriesRemoteDatasource =
+      sl();
   final VetServicesRemoteDatasource _vetServicesRemoteDatasource = sl();
   final StoresServicesRemoteDatasource _storesServicesRemoteDatasource = sl();
   final ServicesRemoteDataSource _servicesRemoteDataSource = sl();
@@ -46,17 +48,21 @@ class ServicesCubit extends Cubit<ServicesState> {
 
   BaseErrorModel? baseErrorModel;
   List<LaborerModel> laborersList = [];
+  List<LaborerModel> laborersListFilterdMap = [];
+  // List<LaborerModel> laborersList = [];
   List<LaborerModel> userFollowingLaborersList = [];
   LaborerModel? showLaborerModel;
   int allLaborerPageNumber = 1;
   int userFollowingLaborerPageNumber = 1;
   List<VetModel> vetsList = [];
+  List<VetModel> vetsListFilterdMap = [];
   List<VetModel> userFollowingVetList = [];
   VetModel? showVetModel;
   int allVetPageNumber = 1;
   int allCategoriesPageNumber = 1;
   int userFollowingVetPageNumber = 1;
   List<StoreDataModel> storesList = [];
+  List<StoreDataModel> storesListFilterdMap = [];
   List<StoreDataModel> userFollowingStoreList = [];
   StoreDataModel? showStoreModel;
   int allStorePageNumber = 1;
@@ -120,7 +126,7 @@ class ServicesCubit extends Cubit<ServicesState> {
   }
 
   /// --------------------------------------> Laborer Logic Methods <--------------------------------------
-  
+
   LaborerModel? getLaborerById(int id) {
     try {
       return laborersList.firstWhere((laborer) => laborer.id == id);
@@ -129,13 +135,15 @@ class ServicesCubit extends Cubit<ServicesState> {
     }
   }
 
-  void getAllLaborer() async {
+  void getAllLaborer({
+    String? mapIds,
+  }) async {
     if (allLaborerPageNumber == 1) {
       emit(GetAllLaborerLoadingState());
     }
     final response = await _laborerRemoteDatasource.getAll(
       pageNumber: allLaborerPageNumber,
-
+      mapIds: mapIds,
     );
     response.fold(
       (l) {
@@ -170,18 +178,19 @@ class ServicesCubit extends Cubit<ServicesState> {
     if (userFollowingLaborerPageNumber == 1) {
       emit(GetUserFollowingLaborerLoadingState());
     }
-    
+
     final response = await _laborerRemoteDatasource.getUserFollowing(
       pageNumber: userFollowingLaborerPageNumber,
     );
-    
+
     response.fold(
       (l) {
         baseErrorModel = l.baseErrorModel;
-        emit(GetUserFollowingLaborerErrorState(error: baseErrorModel?.message ?? ""));
+        emit(GetUserFollowingLaborerErrorState(
+            error: baseErrorModel?.message ?? ""));
       },
       (r) {
-        if (r.storePaginatedModel?.laborerList == null || 
+        if (r.storePaginatedModel?.laborerList == null ||
             r.storePaginatedModel!.laborerList!.isEmpty) {
           emit(GetUserFollowingLaborerSuccessState());
           return;
@@ -310,7 +319,8 @@ class ServicesCubit extends Cubit<ServicesState> {
   void getAllCountries() async {
     getAllCountriesLoading = true;
     emit(GetCitiesLoadingState());
-    final response = await _citiesAndCountriesRemoteDatasource.getAllCountries();
+    final response =
+        await _citiesAndCountriesRemoteDatasource.getAllCountries();
     response.fold(
       (l) {
         getAllCountriesLoading = false;
@@ -348,7 +358,9 @@ class ServicesCubit extends Cubit<ServicesState> {
       (l) {
         baseErrorModel = l.baseErrorModel;
         // emit(UploadLaborerErrorState(error: baseErrorModel?.errors?[0] ?? ""));
-        emit(UploadLaborerErrorState(error: baseErrorModel?.errors?[0] ?? baseErrorModel?.message ?? ""));
+        emit(UploadLaborerErrorState(
+            error:
+                baseErrorModel?.errors?[0] ?? baseErrorModel?.message ?? ""));
       },
       (r) {
         emit(UploadLaborerSuccessState());
@@ -382,12 +394,13 @@ class ServicesCubit extends Cubit<ServicesState> {
     }
   }
 
-  void getAllVet() async {
+  void getAllVet({String? mapIds}) async {
     if (allVetPageNumber == 1) {
       emit(GetAllVetLoadingState());
     }
     final response = await _vetServicesRemoteDatasource.getAll(
       pageNumber: allVetPageNumber,
+      mapIds: mapIds,
     );
     response.fold(
       (l) {
@@ -398,7 +411,7 @@ class ServicesCubit extends Cubit<ServicesState> {
         if (allVetPageNumber <= r.storePaginatedModel!.lastPage!) {
           if (r.storePaginatedModel!.currentPage! <=
               r.storePaginatedModel!.lastPage!) {
-            vetsList.addAll(r.storePaginatedModel!.vetList??[]);
+            vetsList.addAll(r.storePaginatedModel!.vetList ?? []);
             for (var element in vetsList) {
               if (element.vendor!.isFollowed != null) {
                 if (!followedVendors.containsKey(element.id!.toString())) {
@@ -420,7 +433,7 @@ class ServicesCubit extends Cubit<ServicesState> {
     if (userFollowingVetPageNumber == 1) {
       emit(GetUserFollowingVetLoadingState());
     }
-    
+
     final response = await _vetServicesRemoteDatasource.getUserFollowing(
       pageNumber: userFollowingVetPageNumber,
     );
@@ -428,10 +441,12 @@ class ServicesCubit extends Cubit<ServicesState> {
     response.fold(
       (l) {
         baseErrorModel = l.baseErrorModel;
-        emit(GetUserFollowingVetErrorState(error: baseErrorModel?.message ?? ""));
+        emit(GetUserFollowingVetErrorState(
+            error: baseErrorModel?.message ?? ""));
       },
       (r) {
-        if (r.storePaginatedModel?.vetList == null || r.storePaginatedModel!.vetList!.isEmpty) {
+        if (r.storePaginatedModel?.vetList == null ||
+            r.storePaginatedModel!.vetList!.isEmpty) {
           emit(GetUserFollowingVetSuccessState());
           return;
         }
@@ -489,7 +504,9 @@ class ServicesCubit extends Cubit<ServicesState> {
       (l) {
         baseErrorModel = l.baseErrorModel;
         // emit(UploadVetErrorState(error: baseErrorModel?.errors?[0] ?? ""));
-        emit(UploadVetErrorState(error: baseErrorModel?.errors?[0] ?? baseErrorModel?.message ?? ""));
+        emit(UploadVetErrorState(
+            error:
+                baseErrorModel?.errors?[0] ?? baseErrorModel?.message ?? ""));
       },
       (r) {
         emit(UploadVetSuccessState());
@@ -523,32 +540,38 @@ class ServicesCubit extends Cubit<ServicesState> {
     }
   }
 
-  void getAllStore() async {
+  void getAllStore({
+    String? mapIds,
+  }) async {
     if (allStorePageNumber == 1) {
       emit(GetAllStoreLoadingState());
     }
-    
+
     final response = await _storesServicesRemoteDatasource.getAll(
       pageNumber: allStorePageNumber,
+      mapIds: mapIds,
     );
-    
+
     response.fold(
       (l) {
         baseErrorModel = l.baseErrorModel;
         emit(GetAllStoreErrorState(error: baseErrorModel?.message ?? ""));
       },
       (r) {
-        if (r.storePaginatedModel?.storeList == null || r.storePaginatedModel!.storeList!.isEmpty) {
+        if (r.storePaginatedModel?.storeList == null ||
+            r.storePaginatedModel!.storeList!.isEmpty) {
           emit(GetAllStoreSuccessState());
           return;
         }
-        
+
         if (allStorePageNumber <= r.storePaginatedModel!.lastPage!) {
-          if (r.storePaginatedModel!.currentPage! <= r.storePaginatedModel!.lastPage!) {
+          if (r.storePaginatedModel!.currentPage! <=
+              r.storePaginatedModel!.lastPage!) {
             storesList.addAll(r.storePaginatedModel!.storeList!);
             for (var element in r.storePaginatedModel!.storeList!) {
               if (element.vendor?.isFollowed != null) {
-                followedVendors[element.id.toString()] = element.vendor!.isFollowed;
+                followedVendors[element.id.toString()] =
+                    element.vendor!.isFollowed;
               }
             }
             allStorePageNumber++;
@@ -563,18 +586,20 @@ class ServicesCubit extends Cubit<ServicesState> {
     if (userFollowingStorePageNumber == 1) {
       emit(GetUserFollowingStoreLoadingState());
     }
-    
+
     final response = await _storesServicesRemoteDatasource.getUserFollowing(
       pageNumber: userFollowingStorePageNumber,
     );
-    
+
     response.fold(
       (l) {
         baseErrorModel = l.baseErrorModel;
-        emit(GetUserFollowingStoreErrorState(error: baseErrorModel?.message ?? ""));
+        emit(GetUserFollowingStoreErrorState(
+            error: baseErrorModel?.message ?? ""));
       },
       (r) {
-        if (r.storePaginatedModel?.storeList == null || r.storePaginatedModel!.storeList!.isEmpty) {
+        if (r.storePaginatedModel?.storeList == null ||
+            r.storePaginatedModel!.storeList!.isEmpty) {
           emit(GetUserFollowingStoreSuccessState());
           return;
         }
@@ -612,12 +637,12 @@ class ServicesCubit extends Cubit<ServicesState> {
 
   void followVendor({required int vendorId}) async {
     if (followedVendors[vendorId.toString()] ?? false) return;
-    
+
     followedVendors[vendorId.toString()] = true;
     emit(FollowVendorLoadingState());
-    
+
     final response = await _profileRemoteDatasource.followVendor(id: vendorId);
-    
+
     response.fold(
       (l) {
         followedVendors[vendorId.toString()] = false;
@@ -629,7 +654,7 @@ class ServicesCubit extends Cubit<ServicesState> {
         userFollowingVetPageNumber = 1;
         userFollowingLaborerPageNumber = 1;
         userFollowingStorePageNumber = 1;
-        
+
         // Clear lists
         userFollowingVetList = [];
         userFollowingLaborersList = [];
@@ -647,15 +672,16 @@ class ServicesCubit extends Cubit<ServicesState> {
 
   void unfollowVendor({required int vendorId}) async {
     if (!(followedVendors[vendorId.toString()] ?? false)) return;
-    
+
     followedVendors[vendorId.toString()] = false;
     emit(UnfollowLoadingState());
-    
-    final response = await _profileRemoteDatasource.unfollowVendor(id: vendorId);
-    
+
+    final response =
+        await _profileRemoteDatasource.unfollowVendor(id: vendorId);
+
     response.fold(
       (l) {
-        followedVendors[vendorId.toString()] = true; 
+        followedVendors[vendorId.toString()] = true;
         baseErrorModel = l.baseErrorModel;
         emit(UnfollowErrorState(error: baseErrorModel?.errors?[0] ?? ""));
       },
@@ -674,7 +700,7 @@ class ServicesCubit extends Cubit<ServicesState> {
         getUserFollowingVet();
         getUserFollowingLaborer();
         getUserFollowingStore();
-        
+
         emit(UnfollowSuccessState());
       },
     );
@@ -703,7 +729,9 @@ class ServicesCubit extends Cubit<ServicesState> {
     response.fold(
       (l) {
         baseErrorModel = l.baseErrorModel;
-        emit(UploadStoreErrorState(error: baseErrorModel?.errors?[0] ?? baseErrorModel?.message ?? ""));
+        emit(UploadStoreErrorState(
+            error:
+                baseErrorModel?.errors?[0] ?? baseErrorModel?.message ?? ""));
       },
       (r) {
         emit(UploadStoreSuccessState());
@@ -776,12 +804,14 @@ class ServicesCubit extends Cubit<ServicesState> {
       return; // Do not add the "All" category again
     }
 
-    allServicesList.insert(0, ServiceModel(
-      id: -1, // Unique ID for the new category
-      name: "الكل", // Name of the new category
-      type: "all", // Type identifier for the new category
-      image: "https://ban3am.com/storage/initializing/all.png",
-    ));
+    allServicesList.insert(
+        0,
+        ServiceModel(
+          id: -1, // Unique ID for the new category
+          name: "الكل", // Name of the new category
+          type: "all", // Type identifier for the new category
+          image: "https://ban3am.com/storage/initializing/all.png",
+        ));
     emit(GetAllServicesSuccessState());
   }
 
@@ -857,6 +887,7 @@ class ServicesCubit extends Cubit<ServicesState> {
 
   CityModel? chosenCity;
   List<MultiLangImageModel> storeUploadedImages = [];
+
   void chooseCity(CityModel? value) {
     chosenCity = value;
     emit(ChangeCategoryState());

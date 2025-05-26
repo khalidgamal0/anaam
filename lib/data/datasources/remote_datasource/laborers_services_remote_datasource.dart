@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:an3am/core/error/error_exception.dart';
 import 'package:an3am/core/parameters/laborer_parameters.dart';
 import 'package:an3am/data/datasources/remote_datasource/services_base_remote_data_source.dart';
@@ -48,11 +50,16 @@ class LaborersRemoteDatasource extends ServicesBaseDatasource<
 
   @override
   Future<Either<ErrorException, GetAllLaborersModel>> getAll(
-      {required int pageNumber}) async
+      {required int pageNumber, String? mapIds,}) async
   {
     try {
+      String url = "${EndPoints.laborers}?page=$pageNumber";
+      if (mapIds != null) {
+        url += "&mapids=$mapIds";
+      }
+      log("urlurlurlurlurlurlurlurlurlurlurlurl ${url}");
       final response = await dioHelper.getData(
-        url: "${EndPoints.laborers}?page=$pageNumber",
+        url: url,
         token: token,
       );
       return Right(GetAllLaborersModel.fromJson(response.data));

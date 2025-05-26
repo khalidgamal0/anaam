@@ -2,18 +2,22 @@ import 'dart:async';
 import 'dart:developer' as print;
 import 'dart:math';
 import 'dart:typed_data';
+import 'package:an3am/domain/controllers/services_cubit/services_cubit.dart';
 import 'package:custom_info_window/custom_info_window.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../../../core/assets_path/images_path.dart';
+import '../../../../data/models/laborers_models/laborer_model.dart';
 import '../../../../data/models/stores_models/store_data_model.dart';
+import '../../../../data/models/vet_models/vet_model.dart';
 import '../../../../presentation/widgets/maps_widgets/home_google_map_view.dart';
 import '../../../../presentation/widgets/maps_widgets/info_on_service_map.dart';
 import 'dart:ui' as ui;
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+
 part 'service_map_state.dart';
 
 class ServiceMapCubit extends Cubit<ServiceMapState> {
@@ -21,14 +25,15 @@ class ServiceMapCubit extends Cubit<ServiceMapState> {
 
   static ServiceMapCubit get(context) => BlocProvider.of(context);
 
-  final CustomInfoWindowController customInfoWindowController = CustomInfoWindowController();
+  final CustomInfoWindowController customInfoWindowController =
+      CustomInfoWindowController();
   final Completer<GoogleMapController> googleMapController =
-  Completer<GoogleMapController>();
+      Completer<GoogleMapController>();
   BitmapDescriptor currentIcon = BitmapDescriptor.defaultMarker;
 
   Future<void> getCurrentMarker() async {
     final Uint8List markerIcon =
-    await getBytesFromAsset(ImagesPath.mapMarkerIcon, 100.w.toInt());
+        await getBytesFromAsset(ImagesPath.mapMarkerIcon, 100.w.toInt());
     currentIcon = BitmapDescriptor.fromBytes(markerIcon);
   }
 
@@ -67,13 +72,16 @@ class ServiceMapCubit extends Cubit<ServiceMapState> {
 
   void expandClusterMarkers(LatLng center, List<MapItem> products) async {
     // Remove the cluster marker at the tapped cluster position
-    markers.removeWhere((marker) => marker.markerId.value == "cluster_${getClusterKey(center.latitude, center.longitude)}");
+    markers.removeWhere((marker) =>
+        marker.markerId.value ==
+        "cluster_${getClusterKey(center.latitude, center.longitude)}");
 
     // Remove any previous expanded markers for this cluster (optional)
     expandedMarkers.removeWhere((m) => m.markerId.value.endsWith("_expanded"));
 
     // Clear polylines for this cluster (optional)
-    polylines.removeWhere((line) => line.polylineId.value.contains(center.toString()));
+    polylines.removeWhere(
+        (line) => line.polylineId.value.contains(center.toString()));
 
     // Create and add individual markers around the center
     final double radius = 0.00015;
@@ -81,7 +89,8 @@ class ServiceMapCubit extends Cubit<ServiceMapState> {
       double angle = (2 * pi * i) / products.length;
       double offsetLat = radius * cos(angle);
       double offsetLng = radius * sin(angle);
-      LatLng newPosition = LatLng(center.latitude + offsetLat, center.longitude + offsetLng);
+      LatLng newPosition =
+          LatLng(center.latitude + offsetLat, center.longitude + offsetLng);
 
       final expandedMarker = Marker(
         markerId: MarkerId("${products[i].id}_expanded"),
@@ -114,14 +123,17 @@ class ServiceMapCubit extends Cubit<ServiceMapState> {
     }
 
     // Remove cluster marker and add expanded markers
-    markers.removeWhere((m) => m.markerId.value == "cluster_${getClusterKey(center.latitude, center.longitude)}");
+    markers.removeWhere((m) =>
+        m.markerId.value ==
+        "cluster_${getClusterKey(center.latitude, center.longitude)}");
     markers.addAll(expandedMarkers);
 
     emit(ServiceMapMarkersUpdated());
 
     // Animate camera to cluster center + zoom in
     if (mapController != null) {
-      await mapController!.animateCamera(CameraUpdate.newLatLngZoom(center, 18));
+      await mapController!
+          .animateCamera(CameraUpdate.newLatLngZoom(center, 18));
     }
   }
 
@@ -245,7 +257,8 @@ class ServiceMapCubit extends Cubit<ServiceMapState> {
           ),
         );
       } else {
-        final BitmapDescriptor clusterIcon = await getClusterBitmapDescriptor(group.length);
+        final BitmapDescriptor clusterIcon =
+            await getClusterBitmapDescriptor(group.length);
 
         newMarkers.add(
           Marker(
@@ -270,12 +283,13 @@ class ServiceMapCubit extends Cubit<ServiceMapState> {
   }
 
   void updateLocalProducts(List<MapItem> newList) {
+    print.log('update marker');
     localProductsList = newList;
     buildMarkers();
   }
-setStat(){
-    emit(newState());
-}
+
+
+
   LatLng calculateCenter() {
     if (markers.isEmpty) {
       return const LatLng(24.7136, 46.6753); // Riyadh default
@@ -297,15 +311,76 @@ setStat(){
   GoogleMapController? mapController;
   LatLngBounds? lastKnownBounds;
 
-  Future<List<dynamic>> getVisibleMarkers() async {
-    if (mapController == null) return [];
 
-    final LatLngBounds visibleRegion = await mapController!.getVisibleRegion();
 
-    lastKnownBounds = visibleRegion;
+  Timer? _debounceTimer;
 
-    return markers.where((m) {
-      return visibleRegion.contains(m.position);
-    }).toList();
+  void debouncedGetVisibleMarkers(context) {
+    _debounceTimer?.cancel();
+    _debounceTimer = Timer(
+        const Duration(milliseconds: 500), () => getVisibleMarkers(context));
+  }
+
+  Future getVisibleMarkers(BuildContext context) async {
+    if (!isMapReady || mapController == null) return [];
+
+    try {
+      lastKnownBounds = await mapController!.getVisibleRegion();
+      List<dynamic> visibleProducts = [];
+
+      final cubit = context.read<ServicesCubit>();
+
+      // 🔄 تفريغ القوائم قبل الإضافة الجديدة
+      cubit.laborersListFilterdMap.clear();
+      cubit.storesListFilterdMap.clear();
+      cubit.vetsListFilterdMap.clear();
+
+isFirstFetch=false;
+      emit(newState());
+      print.log("isFirstFetch${isFirstFetch.toString()}");
+      print.log("🧹 تم تفريغ القوائم الثلاث قبل بدء التحديث");
+      print.log("🚀 بدء فحص العناصر داخل المنطقة المرئية...");
+
+      for (var product in localProductsList) {
+        if (product.coordinates != null && product.coordinates!.isNotEmpty) {
+          try {
+            final lat = double.parse(product.coordinates!.split(",").first.trim());
+            final lng = double.parse(product.coordinates!.split(",").last.trim());
+            final position = LatLng(lat, lng);
+
+            if (lastKnownBounds!.contains(position)) {
+              visibleProducts.add(product);
+
+              if (product is LaborerModel) {
+                print.log("👷‍♂️ Laborer | قبل الإضافة: ${cubit.laborersListFilterdMap.length}");
+                cubit.laborersListFilterdMap.add(product);
+                print.log("👷‍♂️ Laborer | بعد الإضافة: ${cubit.laborersListFilterdMap.length}");
+              } else if (product is StoreDataModel) {
+                print.log("🏪 Store   | قبل الإضافة: ${cubit.storesListFilterdMap.length}");
+                cubit.storesListFilterdMap.add(product);
+                print.log("🏪 Store   | بعد الإضافة: ${cubit.storesListFilterdMap.length}");
+              } else if (product is VetModel) {
+                print.log("🐶 Vet     | قبل الإضافة: ${cubit.vetsListFilterdMap.length}");
+                cubit.vetsListFilterdMap.add(product);
+                print.log("🐶 Vet     | بعد الإضافة: ${cubit.vetsListFilterdMap.length}");
+              }
+            }
+          } catch (e) {
+            print.log("⚠️ خطأ في إحداثيات المنتج (${product.runtimeType}): $e");
+          }
+        }
+      }
+
+      print.log("✅ عدد العناصر داخل الشاشة: ${visibleProducts.length}");
+      print.log("👷‍♂️ Laborers الإجمالي: ${cubit.laborersListFilterdMap.length}");
+      print.log("🏪 Stores الإجمالي: ${cubit.storesListFilterdMap.length}");
+      print.log("🐶 Vets الإجمالي: ${cubit.vetsListFilterdMap.length}");
+
+      emit(newState()); // تحديث الحالة بعد الانتهاء
+
+    } catch (e) {
+      print.log("❌ خطأ أثناء جلب المنطقة المرئية: $e");
+      return [];
+    }
   }
 }
