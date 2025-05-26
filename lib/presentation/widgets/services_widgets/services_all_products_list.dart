@@ -50,7 +50,7 @@ class _ServicesAllProductsListState extends State<ServicesAllProductsList> {
           ServicesCubit cubit = ServicesCubit.get(context);
           return cubit.selectedServicesValue!.type == ServicesTypeEnum.veterinary.name
               ? VetServicesList(
-                  vetsList:isFirstFetch?cubit.vetsList:cubit.vetsListFilterdMap, isFollowing: false,
+                  vetsList:(isFirstFetch)?cubit.vetsList:cubit.vetsListFilterdMap, isFollowing: false,
                 )
               : cubit.selectedServicesValue!.type == ServicesTypeEnum.laborers.name
                   ? LaborersServicesList(

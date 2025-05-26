@@ -11,9 +11,11 @@ import 'categories_shimmer_effect.dart';
 
 class ServicesCategoriesTabBarWidget extends StatefulWidget {
   const ServicesCategoriesTabBarWidget(
-      {super.key, required this.isServicesFollowingTap, this.onCategorySelected});
+      {super.key, required this.isServicesFollowingTap, this.onCategorySelected, required this.isMap});
 
   final bool isServicesFollowingTap;
+  final bool isMap;
+
   final Function(int)? onCategorySelected;
 
   @override
@@ -60,6 +62,9 @@ class _ServicesCategoriesTabBarWidgetState
                       itemBuilder: (BuildContext context, int index) {
                         return CategoriesTabBarItem(
                           onTap: () {
+                            if(widget.isMap) {
+                              cubitServiceMapCubit.getVisibleMarkers(context);
+                            }
                             cubitServiceMapCubit.updateLocalProducts(
                               index == 0
                                   ? (widget.isServicesFollowingTap

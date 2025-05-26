@@ -260,7 +260,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     children: [
                       if (!isServicesFollowingTap)
                         ServicesCategoriesTabBarWidget(
-                            isServicesFollowingTap: isServicesFollowingTap),
+                            isServicesFollowingTap: isServicesFollowingTap,isMap: isMap,),
                       FollowingAndFollowersTabBar(
                         tabController: _followersServicesTabController,
                         onTap: (index) {

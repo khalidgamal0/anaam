@@ -314,7 +314,11 @@ class ServiceMapCubit extends Cubit<ServiceMapState> {
 
 
   Timer? _debounceTimer;
+changeList(){
 
+  isFirstFetch=true;
+  emit(newState());
+}
   void debouncedGetVisibleMarkers(context) {
     _debounceTimer?.cancel();
     _debounceTimer = Timer(

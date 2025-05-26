@@ -45,10 +45,7 @@ class _ServiceMapWidgetState extends State<ServiceMapWidget> {
                 cubit.lastKnownBounds =
                 await cubit.mapController!.getVisibleRegion();
                 setState(() => cubit.isMapReady = true);
-                Future.delayed(
-                  const Duration(milliseconds: 500),
-                  () => cubit.getVisibleMarkers(context),
-                );
+                cubit.getVisibleMarkers(context);
               },
               onTap: (latLng) {
                 cubit.customInfoWindowController.hideInfoWindow?.call();
@@ -129,29 +126,30 @@ class _ServiceMapWidgetState extends State<ServiceMapWidget> {
                 ),
               ),
             ),
-            // if (kDebugMode)
-            //   Positioned(
-            //     top: 20.h,
-            //     left: 20.w,
-            //     child: FloatingActionButton(
-            //       heroTag: 'clearCacheMap',
-            //       mini: true,
-            //       backgroundColor: Colors.orange,
-            //       onPressed: () async {
-            //         // await ProductsCubit.get(context).clearMapCacheAndReset();
-            //         // loadFreshProducts();
-            //         if (context.mounted) {
-            //           ScaffoldMessenger.of(context).showSnackBar(
-            //             const SnackBar(
-            //               content: Text('Map cache cleared. Reloading products...'),
-            //             ),
-            //           );
-            //         }
-            //       },
-            //       tooltip: 'Clear Map Cache & Reload',
-            //       child: const Icon(Icons.delete_sweep, color: Colors.white),
-            //     ),
-            //   ),
+            Positioned(
+              top: 20.h,
+              left: 20.w,
+              child: FloatingActionButton(
+                heroTag: 'clearCacheMap',
+                // Added unique heroTag
+                mini: true,
+                backgroundColor: Colors.orange,
+                // Dev button color
+                onPressed: () async {
+                 cubit.changeList();
+                  if (mounted) {
+                    // Check if widget is still in tree
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                          content: Text(
+                              'Map cache cleared. Reloading products...')),
+                    );
+                  }
+                },
+                tooltip: 'Clear Map Cache & Reload',
+                child: Icon(Icons.delete_sweep, color: Colors.white),
+              ),
+            ),
           ],
         );
       },
