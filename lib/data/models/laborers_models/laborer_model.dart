@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 
+import '../city_model/city_model.dart';
+import '../country_model/country_model.dart';
 import '../services/services_model.dart';
 import '../status_moddel.dart';
 import '../stores_models/store_data_model.dart';
@@ -14,6 +16,8 @@ class LaborerModel extends Equatable implements MapItem {
   final String? phone;
   final String? phone_code;
   final String? email;
+  final CityModel? city;
+  final CountryModel? country;
   final String? image;
   final String? coordinates;
   final String? mapLocation;
@@ -42,6 +46,8 @@ class LaborerModel extends Equatable implements MapItem {
     this.status,
     this.createdAt,
     this.updatedAt,
+    this.country,
+    this.city,
   });
 
   @override
@@ -63,6 +69,8 @@ class LaborerModel extends Equatable implements MapItem {
     status,
     createdAt,
     updatedAt,
+    country,
+    city,
   ];
 
   factory LaborerModel.fromJson(Map<String, dynamic> json) {
@@ -78,6 +86,8 @@ class LaborerModel extends Equatable implements MapItem {
       image: json['image'],
       coordinates: json['coordinates'],
       mapLocation: json['map_location'],
+      city: json['city'] != null ? CityModel.fromJson(json['city']) : null,
+      country: json['country'] != null ? CountryModel.fromJson(json['country']) : null,
       isApproved: json['is_approved'],
       vendor: json['vendor'] != null ? VendorInfoModel.fromJson(json['vendor']) : null,
       service: json['service'] != null ? ServiceModel.fromJson(json['service']) : null,

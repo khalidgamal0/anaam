@@ -14,6 +14,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../../../core/app_theme/app_colors.dart';
+import '../../../../data/models/city_model/city_model.dart';
 import '../../../../domain/controllers/services_cubit/services_cubit.dart';
 import '../../../../translations/locale_keys.g.dart';
 import '../../../widgets/auth_widgets/custom_text_field.dart';
@@ -208,6 +209,63 @@ class _AddLaborerScreenState extends State<AddLaborerScreen> {
                     const CustomSizedBox(
                       height: 11,
                     ),
+
+                    cubit.getAllCountriesLoading
+                        ? const Center(
+                      child: CircularProgressIndicator.adaptive(),
+                    )
+                        :CustomDropDownButton<CountryModel>(
+                      height: 45,
+                      onChanged: (selectedCountry) {
+                        setState(() {
+                          cubit.chosenCountry = selectedCountry;
+                          cubit.chosenCity = null;
+                        });
+                      },
+                      hint: LocaleKeys.pleaseChooseYourCountry.tr(),
+                      items: cubit.countriesList
+                          .map((e) => DropdownMenuItem(
+                        value: e,
+                        child: Text(e.name!,
+                            style: Theme.of(context)
+                                .textTheme
+                                .headlineSmall!
+                                .copyWith(fontSize: 14.sp)),
+                      ))
+                          .toList(),
+                      value: cubit.chosenCountry,
+                    ),
+
+
+                    const CustomSizedBox(
+                      height: 11,
+                    ),
+
+                    cubit.getAllCitiesLoading
+                        ? const Center(child: CircularProgressIndicator.adaptive())
+                        : CustomDropDownButton<CityModel>(
+                      height: 45,
+                      onChanged: cubit.chooseCity,
+                      hint: LocaleKeys.pleaseChooseYourCity.tr(),
+                      items: cubit.citiesList
+                          .where((city) => city.country!.id == cubit.chosenCountry?.id)
+                          .map((e) => DropdownMenuItem(
+                        value: e,
+                        child: Text(e.name!,
+                            style: Theme.of(context)
+                                .textTheme
+                                .headlineSmall!
+                                .copyWith(fontSize: 14.sp)),
+                      ))
+                          .toList(),
+                      value: cubit.chosenCity,
+                    ),
+
+
+                    const CustomSizedBox(
+                      height: 11,
+                    ),
+
                     CustomTextField(
                       hintText: LocaleKeys.productNameAr.tr(),
                       controller: cubit.laborerNameAr,
@@ -385,6 +443,8 @@ class _AddLaborerScreenState extends State<AddLaborerScreen> {
                                    mapLocation: cubit.mapLocation,
                                    email: cubit.laborerEmail.text,
                                    nationalityAr: cubit.nationalityAr.text,
+                                   countryId:cubit.chosenCountry?.id.toString(),
+                                   cityId: cubit.chosenCity?.id.toString()??'',
                                  ),
                                );
                              }
@@ -404,6 +464,8 @@ class _AddLaborerScreenState extends State<AddLaborerScreen> {
                                mapLocation: cubit.mapLocation,
                                email: cubit.laborerEmail.text,
                                nationalityAr: cubit.nationalityAr.text,
+                               countryId:cubit.chosenCountry!.id.toString(),
+                               cityId: cubit.chosenCity!.id.toString(),
                              ),
                            );
                          }

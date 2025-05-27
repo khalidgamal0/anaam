@@ -21,6 +21,8 @@ class LaborerParameters extends Equatable {
   final String? professionEn;
   final String? addressAr;
   final String? addressEn;
+  final String? cityId;
+  final String? countryId;
 
   const LaborerParameters({
     this.nameAr,
@@ -39,6 +41,8 @@ class LaborerParameters extends Equatable {
     this.professionEn,
     this.addressAr,
     this.addressEn,
+    this.cityId,
+    this.countryId,
   });
 
   @override
@@ -58,6 +62,8 @@ class LaborerParameters extends Equatable {
         professionEn,
         addressAr,
         addressEn,
+    cityId,
+    countryId,
       ];
 
   Future<Map<String, dynamic>> toMap() async {
@@ -84,6 +90,8 @@ class LaborerParameters extends Equatable {
       'profession_en': professionEn,
       'address_ar': addressAr,
       'address_en': addressEn,
+      'city_id': cityId,
+      'country_id': countryId,
     };
   }
 }

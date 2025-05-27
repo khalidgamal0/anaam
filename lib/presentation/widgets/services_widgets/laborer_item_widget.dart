@@ -121,29 +121,14 @@ class LaborerServicesWidget extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-
-                    children: [
-                      Text(
-                        laborerModel.name!,
-                        style: CustomThemes.greyColor34TextTheme(context).copyWith(
-                          fontSize: 14.sp,
-                          height: 1,
-                          fontWeight: FontWeight.w400,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const CustomSizedBox(height: 8),
-                      Text(
-                        laborerModel.nationality ?? "",
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.labelSmall!.copyWith(
-                          fontSize: 16.sp,
-                        ),
-                      ),
-                    ],
+                  child: Text(
+                    laborerModel.name!,
+                    style: CustomThemes.greyColor34TextTheme(context).copyWith(
+                      fontSize: 14.sp,
+                      height: 1,
+                      fontWeight: FontWeight.w400,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
                 Row(
@@ -212,6 +197,30 @@ class LaborerServicesWidget extends StatelessWidget {
                 ),
               ],
             ),
+            const CustomSizedBox(height: 4),
+
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    laborerModel.country?.name ?? "",
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.labelSmall!.copyWith(
+                      fontSize: 16.sp,
+                    ),
+                  ),
+                ),
+
+                if (buildFlag( laborerModel.country?.id) != null) ...[
+                  buildFlag( laborerModel.country?.id)!,
+                  SizedBox(width: 5.w),
+                ],
+              ],
+            ),
+            const CustomSizedBox(height: 4),
+
 
           ],
         );

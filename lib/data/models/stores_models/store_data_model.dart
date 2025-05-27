@@ -130,6 +130,8 @@ abstract class MapItem {
   String? get name;
   String? get image;
   String? get mapLocation;
+   CountryModel? get country;
+
 
 
   int? get id;

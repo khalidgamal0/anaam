@@ -305,10 +305,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                   isMap
                                       ? ServiceMapWidget()
                                       : ServicesFollowingList(),
-                                if (CacheHelper.getData(
-                                        key: CacheKeys.token) ==
-                                    null)
-                                  Container(),
+                                // if (CacheHelper.getData(
+                                //         key: CacheKeys.token) ==
+                                //     null)
+                                //   Container(),
 
                               ],
                             );

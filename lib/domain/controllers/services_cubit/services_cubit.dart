@@ -138,41 +138,59 @@ class ServicesCubit extends Cubit<ServicesState> {
   void getAllLaborer({
     String? mapIds,
   }) async {
-    if (allLaborerPageNumber == 1) {
-      emit(GetAllLaborerLoadingState());
-    }
-    final response = await _laborerRemoteDatasource.getAll(
-      pageNumber: allLaborerPageNumber,
-      mapIds: mapIds,
-    );
-    response.fold(
-      (l) {
-        baseErrorModel = l.baseErrorModel;
-        emit(GetAllLaborerErrorState(error: baseErrorModel?.message ?? ""));
-      },
-      (r) {
-        if (r.storePaginatedModel!.lastPage != null) {
-          if (allLaborerPageNumber <= r.storePaginatedModel!.lastPage!) {
-            if (r.storePaginatedModel!.currentPage! <=
-                r.storePaginatedModel!.lastPage!) {
-              laborersList.addAll(r.storePaginatedModel!.laborerList!);
-              for (var element in laborersList) {
-                if (element.vendor!.isFollowed != null) {
-                  if (!followedVendors.containsKey(element.id!.toString())) {
-                    followedVendors.addAll({
-                      element.vendor!.id.toString(): element.vendor!.isFollowed
-                    });
-                  }
-                }
+    emit(GetAllLaborerLoadingState());
+
+    bool hasMorePages = true;
+
+    while (hasMorePages) {
+      final response = await _laborerRemoteDatasource.getAll(
+        pageNumber: allLaborerPageNumber,
+        mapIds: mapIds,
+      );
+
+      final shouldBreak = response.fold(
+            (l) {
+          baseErrorModel = l.baseErrorModel;
+          emit(GetAllLaborerErrorState(error: baseErrorModel?.message ?? ""));
+          return true; // Stop the loop on error
+        },
+            (r) {
+          final paginatedModel = r.storePaginatedModel;
+          final currentPage = paginatedModel?.currentPage ?? 1;
+          final lastPage = paginatedModel?.lastPage ?? 1;
+
+          if (paginatedModel?.laborerList != null) {
+            laborersList.addAll(paginatedModel!.laborerList!);
+            for (var element in paginatedModel.laborerList!) {
+              if (element.vendor?.isFollowed != null) {
+                followedVendors.putIfAbsent(
+                  element.vendor!.id.toString(),
+                      () => element.vendor!.isFollowed,
+                );
               }
-              allLaborerPageNumber++;
             }
-            emit(GetAllLaborerSuccessState());
           }
-        }
-      },
-    );
+
+          allLaborerPageNumber++;
+
+          // Stop if last page reached
+          if (currentPage >= lastPage) {
+            hasMorePages = false;
+          }
+
+          return false;
+        },
+      );
+
+      if (shouldBreak) break;
+
+      // Wait 500 milliseconds before next request
+      await Future.delayed(const Duration(milliseconds: 500));
+    }
+
+    emit(GetAllLaborerSuccessState());
   }
+
 
   void getUserFollowingLaborer() async {
     if (userFollowingLaborerPageNumber == 1) {
@@ -395,38 +413,57 @@ class ServicesCubit extends Cubit<ServicesState> {
   }
 
   void getAllVet({String? mapIds}) async {
-    if (allVetPageNumber == 1) {
-      emit(GetAllVetLoadingState());
-    }
-    final response = await _vetServicesRemoteDatasource.getAll(
-      pageNumber: allVetPageNumber,
-      mapIds: mapIds,
-    );
-    response.fold(
-      (l) {
-        baseErrorModel = l.baseErrorModel;
-        emit(GetAllVetErrorState(error: baseErrorModel?.message ?? ""));
-      },
-      (r) {
-        if (allVetPageNumber <= r.storePaginatedModel!.lastPage!) {
-          if (r.storePaginatedModel!.currentPage! <=
-              r.storePaginatedModel!.lastPage!) {
-            vetsList.addAll(r.storePaginatedModel!.vetList ?? []);
-            for (var element in vetsList) {
-              if (element.vendor!.isFollowed != null) {
-                if (!followedVendors.containsKey(element.id!.toString())) {
-                  followedVendors.addAll({
-                    element.vendor!.id.toString(): element.vendor!.isFollowed
-                  });
-                }
+    emit(GetAllVetLoadingState());
+
+    bool hasMorePages = true;
+
+    while (hasMorePages) {
+      final response = await _vetServicesRemoteDatasource.getAll(
+        pageNumber: allVetPageNumber,
+        mapIds: mapIds,
+      );
+
+      final shouldBreak = response.fold(
+            (l) {
+          baseErrorModel = l.baseErrorModel;
+          emit(GetAllVetErrorState(error: baseErrorModel?.message ?? ""));
+          return true; // Stop the loop on error
+        },
+            (r) {
+          final paginatedModel = r.storePaginatedModel;
+          final currentPage = paginatedModel?.currentPage ?? 1;
+          final lastPage = paginatedModel?.lastPage ?? 1;
+
+          if (paginatedModel?.vetList != null) {
+            vetsList.addAll(paginatedModel!.vetList!);
+            for (var element in paginatedModel.vetList!) {
+              if (element.vendor?.isFollowed != null) {
+                followedVendors.putIfAbsent(
+                  element.vendor!.id.toString(),
+                      () => element.vendor!.isFollowed,
+                );
               }
             }
-            allVetPageNumber++;
           }
-          emit(GetAllLaborerSuccessState());
-        }
-      },
-    );
+
+          allVetPageNumber++;
+
+          // Stop if last page is reached
+          if (currentPage >= lastPage) {
+            hasMorePages = false;
+          }
+
+          return false;
+        },
+      );
+
+      if (shouldBreak) break;
+
+      // Add a delay between each request (optional: adjust duration)
+      await Future.delayed(const Duration(milliseconds: 500));
+    }
+
+    emit(GetAllVetSuccessState());
   }
 
   void getUserFollowingVet() async {
@@ -543,44 +580,64 @@ class ServicesCubit extends Cubit<ServicesState> {
   void getAllStore({
     String? mapIds,
   }) async {
-    if (allStorePageNumber == 1) {
-      emit(GetAllStoreLoadingState());
-    }
+    emit(GetAllStoreLoadingState());
 
-    final response = await _storesServicesRemoteDatasource.getAll(
-      pageNumber: allStorePageNumber,
-      mapIds: mapIds,
-    );
+    bool hasMorePages = true;
 
-    response.fold(
-      (l) {
-        baseErrorModel = l.baseErrorModel;
-        emit(GetAllStoreErrorState(error: baseErrorModel?.message ?? ""));
-      },
-      (r) {
-        if (r.storePaginatedModel?.storeList == null ||
-            r.storePaginatedModel!.storeList!.isEmpty) {
-          emit(GetAllStoreSuccessState());
-          return;
-        }
+    while (hasMorePages) {
+      final response = await _storesServicesRemoteDatasource.getAll(
+        pageNumber: allStorePageNumber,
+        mapIds: mapIds,
+      );
 
-        if (allStorePageNumber <= r.storePaginatedModel!.lastPage!) {
-          if (r.storePaginatedModel!.currentPage! <=
-              r.storePaginatedModel!.lastPage!) {
-            storesList.addAll(r.storePaginatedModel!.storeList!);
-            for (var element in r.storePaginatedModel!.storeList!) {
+      final shouldBreak = response.fold(
+            (l) {
+          baseErrorModel = l.baseErrorModel;
+          emit(GetAllStoreErrorState(error: baseErrorModel?.message ?? ""));
+          return true; // Stop the loop on error
+        },
+            (r) {
+          final model = r.storePaginatedModel;
+
+          if (model?.storeList == null || model!.storeList!.isEmpty) {
+            hasMorePages = false;
+            return false; // Don't break, just stop loop normally
+          }
+
+          final currentPage = model.currentPage ?? 1;
+          final lastPage = model.lastPage ?? 1;
+
+          if (allStorePageNumber <= lastPage && currentPage <= lastPage) {
+            storesList.addAll(model.storeList!);
+            for (var element in model.storeList!) {
               if (element.vendor?.isFollowed != null) {
                 followedVendors[element.id.toString()] =
                     element.vendor!.isFollowed;
               }
             }
             allStorePageNumber++;
+
+            // Check if we've reached the last page
+            if (currentPage >= lastPage) {
+              hasMorePages = false;
+            }
+          } else {
+            hasMorePages = false;
           }
-          emit(GetAllStoreSuccessState());
-        }
-      },
-    );
+
+          return false;
+        },
+      );
+
+      if (shouldBreak) break;
+
+      // Wait 500ms before next request
+      await Future.delayed(const Duration(milliseconds: 500));
+    }
+
+    emit(GetAllStoreSuccessState());
   }
+
 
   void getUserFollowingStore() async {
     if (userFollowingStorePageNumber == 1) {
