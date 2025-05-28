@@ -26,14 +26,14 @@ class ServiceMapCubit extends Cubit<ServiceMapState> {
   static ServiceMapCubit get(context) => BlocProvider.of(context);
 
   final CustomInfoWindowController customInfoWindowController =
-      CustomInfoWindowController();
+  CustomInfoWindowController();
   final Completer<GoogleMapController> googleMapController =
-      Completer<GoogleMapController>();
+  Completer<GoogleMapController>();
   BitmapDescriptor currentIcon = BitmapDescriptor.defaultMarker;
 
   Future<void> getCurrentMarker() async {
     final Uint8List markerIcon =
-        await getBytesFromAsset(ImagesPath.mapMarkerIcon, 100.w.toInt());
+    await getBytesFromAsset(ImagesPath.mapMarkerIcon, 100.w.toInt());
     currentIcon = BitmapDescriptor.fromBytes(markerIcon);
   }
 
@@ -73,7 +73,7 @@ class ServiceMapCubit extends Cubit<ServiceMapState> {
   void expandClusterMarkers(LatLng center, List<MapItem> products) async {
     // Remove the cluster marker at the tapped cluster position
     markers.removeWhere((marker) =>
-        marker.markerId.value ==
+    marker.markerId.value ==
         "cluster_${getClusterKey(center.latitude, center.longitude)}");
 
     // Remove any previous expanded markers for this cluster (optional)
@@ -81,7 +81,7 @@ class ServiceMapCubit extends Cubit<ServiceMapState> {
 
     // Clear polylines for this cluster (optional)
     polylines.removeWhere(
-        (line) => line.polylineId.value.contains(center.toString()));
+            (line) => line.polylineId.value.contains(center.toString()));
 
     // Create and add individual markers around the center
     final double radius = 0.00015;
@@ -90,7 +90,7 @@ class ServiceMapCubit extends Cubit<ServiceMapState> {
       double offsetLat = radius * cos(angle);
       double offsetLng = radius * sin(angle);
       LatLng newPosition =
-          LatLng(center.latitude + offsetLat, center.longitude + offsetLng);
+      LatLng(center.latitude + offsetLat, center.longitude + offsetLng);
 
       final expandedMarker = Marker(
         markerId: MarkerId("${products[i].id}_expanded"),
@@ -124,7 +124,7 @@ class ServiceMapCubit extends Cubit<ServiceMapState> {
 
     // Remove cluster marker and add expanded markers
     markers.removeWhere((m) =>
-        m.markerId.value ==
+    m.markerId.value ==
         "cluster_${getClusterKey(center.latitude, center.longitude)}");
     markers.addAll(expandedMarkers);
 
@@ -189,7 +189,8 @@ class ServiceMapCubit extends Cubit<ServiceMapState> {
     final int size = 80;
     final ui.PictureRecorder recorder = ui.PictureRecorder();
     final Canvas canvas = Canvas(recorder);
-    final Paint paint = Paint()..color = Colors.red;
+    final Paint paint = Paint()
+      ..color = Colors.red;
     canvas.drawCircle(Offset(size / 2, size / 2), size / 2.0, paint);
     final TextPainter textPainter = TextPainter(
         text: TextSpan(
@@ -258,7 +259,7 @@ class ServiceMapCubit extends Cubit<ServiceMapState> {
         );
       } else {
         final BitmapDescriptor clusterIcon =
-            await getClusterBitmapDescriptor(group.length);
+        await getClusterBitmapDescriptor(group.length);
 
         newMarkers.add(
           Marker(
@@ -287,21 +288,24 @@ class ServiceMapCubit extends Cubit<ServiceMapState> {
     localProductsList = newList;
     buildMarkers();
   }
-
-
+  LatLng? firstPosition;
 
   LatLng calculateCenter() {
     if (markers.isEmpty) {
       return const LatLng(24.7136, 46.6753); // Riyadh default
     }
 
-    double totalLat = 0, totalLng = 0;
+    double totalLat = 0,
+        totalLng = 0;
 
     for (Marker marker in markers) {
       totalLat += marker.position.latitude;
       totalLng += marker.position.longitude;
     }
-
+    firstPosition=LatLng(
+      totalLat / markers.length,
+      totalLng / markers.length,
+    );
     return LatLng(
       totalLat / markers.length,
       totalLng / markers.length,
@@ -312,13 +316,17 @@ class ServiceMapCubit extends Cubit<ServiceMapState> {
   LatLngBounds? lastKnownBounds;
 
 
-
   Timer? _debounceTimer;
-changeList(){
 
-  isFirstFetch=true;
-  emit(newState());
-}
+  changeList()async {
+    isFirstFetch = true;
+    if (mapController != null&&firstPosition!=null) {
+      await mapController!
+        .animateCamera(CameraUpdate.newLatLngZoom(firstPosition!,  5.0));
+    }
+    emit(newState());
+  }
+
   void debouncedGetVisibleMarkers(context) {
     _debounceTimer?.cancel();
     _debounceTimer = Timer(
@@ -339,7 +347,7 @@ changeList(){
       cubit.storesListFilterdMap.clear();
       cubit.vetsListFilterdMap.clear();
 
-isFirstFetch=false;
+      isFirstFetch = false;
       emit(newState());
       print.log("isFirstFetch${isFirstFetch.toString()}");
       print.log("🧹 تم تفريغ القوائم الثلاث قبل بدء التحديث");
@@ -348,25 +356,35 @@ isFirstFetch=false;
       for (var product in localProductsList) {
         if (product.coordinates != null && product.coordinates!.isNotEmpty) {
           try {
-            final lat = double.parse(product.coordinates!.split(",").first.trim());
-            final lng = double.parse(product.coordinates!.split(",").last.trim());
+            final lat = double.parse(
+                product.coordinates!.split(",").first.trim());
+            final lng = double.parse(
+                product.coordinates!.split(",").last.trim());
             final position = LatLng(lat, lng);
 
             if (lastKnownBounds!.contains(position)) {
               visibleProducts.add(product);
 
               if (product is LaborerModel) {
-                print.log("👷‍♂️ Laborer | قبل الإضافة: ${cubit.laborersListFilterdMap.length}");
+                print.log(
+                    "👷‍♂️ Laborer | قبل الإضافة: ${cubit.laborersListFilterdMap
+                        .length}");
                 cubit.laborersListFilterdMap.add(product);
-                print.log("👷‍♂️ Laborer | بعد الإضافة: ${cubit.laborersListFilterdMap.length}");
+                print.log(
+                    "👷‍♂️ Laborer | بعد الإضافة: ${cubit.laborersListFilterdMap
+                        .length}");
               } else if (product is StoreDataModel) {
-                print.log("🏪 Store   | قبل الإضافة: ${cubit.storesListFilterdMap.length}");
+                print.log("🏪 Store   | قبل الإضافة: ${cubit.storesListFilterdMap
+                    .length}");
                 cubit.storesListFilterdMap.add(product);
-                print.log("🏪 Store   | بعد الإضافة: ${cubit.storesListFilterdMap.length}");
+                print.log("🏪 Store   | بعد الإضافة: ${cubit.storesListFilterdMap
+                    .length}");
               } else if (product is VetModel) {
-                print.log("🐶 Vet     | قبل الإضافة: ${cubit.vetsListFilterdMap.length}");
+                print.log("🐶 Vet     | قبل الإضافة: ${cubit.vetsListFilterdMap
+                    .length}");
                 cubit.vetsListFilterdMap.add(product);
-                print.log("🐶 Vet     | بعد الإضافة: ${cubit.vetsListFilterdMap.length}");
+                print.log("🐶 Vet     | بعد الإضافة: ${cubit.vetsListFilterdMap
+                    .length}");
               }
             }
           } catch (e) {
@@ -376,7 +394,8 @@ isFirstFetch=false;
       }
 
       print.log("✅ عدد العناصر داخل الشاشة: ${visibleProducts.length}");
-      print.log("👷‍♂️ Laborers الإجمالي: ${cubit.laborersListFilterdMap.length}");
+      print.log(
+          "👷‍♂️ Laborers الإجمالي: ${cubit.laborersListFilterdMap.length}");
       print.log("🏪 Stores الإجمالي: ${cubit.storesListFilterdMap.length}");
       print.log("🐶 Vets الإجمالي: ${cubit.vetsListFilterdMap.length}");
 
