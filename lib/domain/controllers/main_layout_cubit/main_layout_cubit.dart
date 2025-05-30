@@ -1,5 +1,8 @@
+import 'dart:developer';
+
 import 'package:an3am/core/cache_helper/cache_keys.dart';
 import 'package:an3am/core/cache_helper/shared_pref_methods.dart';
+import 'package:an3am/domain/controllers/services_cubit/services_cubit.dart';
 import 'package:an3am/presentation/screens/main_layout_screens/profile_screens/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -38,7 +41,14 @@ class MainLayoutCubit extends Cubit<MainLayoutState> {
       productsCubit.showCategoryModel = null;
       productsCubit.searchValue.clear();
       productsCubit.getAllProducts();
+      log('isFirstFetch=> $isFirstFetch');
+      isFirstFetch=true;
+      log('isFirstFetch=> $isFirstFetch');
+      emit(ChangeBottomNavBarIndexState());
+
+
     }
+
     currentIndex = index;
     emit(ChangeBottomNavBarIndexState());
   }
