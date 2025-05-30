@@ -44,6 +44,7 @@ class MainLayoutCubit extends Cubit<MainLayoutState> {
       log('isFirstFetch=> $isFirstFetch');
       isFirstFetch=true;
       log('isFirstFetch=> $isFirstFetch');
+      ServicesCubit.get(context).changeServicesCategoriesTabBarWidget(0);
       emit(ChangeBottomNavBarIndexState());
 
 

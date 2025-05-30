@@ -290,8 +290,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                               children: [
                                 // First tab content
                                 isMap
-                                    ? ServiceMapWidget(
-                                       )
+                                    ? ServiceMapWidget()
                                     : (cubit.selectedServicesValue != null
                                         ? ServicesAllProductsList()
                                         : const Center(
