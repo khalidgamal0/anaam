@@ -68,6 +68,7 @@ dependencies:
   pusher_channels_flutter: ^2.2.1
 #  firebase_dynamic_links: ^6.1.1
   share_plus: ^10.1.4
+
   font_awesome_flutter: ^10.8.0
 flutter_facebook_auth:
   platforms:
