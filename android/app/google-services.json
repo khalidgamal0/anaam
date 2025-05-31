@@ -7,18 +7,42 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:393431327385:android:cda37b65bc95c4bbb94e08",
+        "mobilesdk_app_id": "1:393431327385:android:a39a64946e759e7eb94e08",
         "android_client_info": {
-          "package_name": "com.ban3am"
+          "package_name": "com.ocoda.anam"
         }
       },
       "oauth_client": [
         {
-          "client_id": "393431327385-ut76kknltactgppo8htp2vff1bu2ahk3.apps.googleusercontent.com",
+          "client_id": "393431327385-84velk6ea81afpnmr0mfvhf95loe0nho.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.ban3am",
-            "certificate_hash": "7f75c11b8fa7ab2505000ba8ae60c5a70f8a242c"
+            "package_name": "com.ocoda.anam",
+            "certificate_hash": "8fdacd59cd69a1da838b349613551f4f68633359"
+          }
+        },
+        {
+          "client_id": "393431327385-l1ko8qq8s8jc1b6o7564phhd20hmrl7k.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ocoda.anam",
+            "certificate_hash": "0fb8a269f31a2a77419afb8add8d4cabc4cea770"
+          }
+        },
+        {
+          "client_id": "393431327385-o7o3ussops6ibt2voq69obsh7gkea2pr.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ocoda.anam",
+            "certificate_hash": "a5e7a136384fa495eb90ed1fb6f715e5b655f969"
+          }
+        },
+        {
+          "client_id": "393431327385-s1hjql6v5m36a4vhtf3ugk851dshrfru.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ocoda.anam",
+            "certificate_hash": "3b91b31a88a9f19c2a23ed1e5e5fbe9fb7ffde53"
           }
         },
         {
@@ -37,6 +61,14 @@
             {
               "client_id": "393431327385-83tg2fappub34gtg7coj8gk8fku9ua0r.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "393431327385-hemtino45ctteh599emsmkcgebefrjfm.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.ban3am",
+                "app_store_id": "6544793737"
+              }
             }
           ]
         }
